@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">MyFoodJournal</string>
     <string name="action_settings">Settings</string>
+    <string name="nav_home">Home Page</string>
+    <string name="nav_myreviews">My Reviews</string>
+    <string name="nav_logout">Log Out</string>
 </resources>
