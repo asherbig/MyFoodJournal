@@ -1,5 +1,7 @@
 package team7202.myfoodjournal;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -31,7 +33,6 @@ public class DefaultActivity extends AppCompatActivity {
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getSupportActionBar().setTitle("MyFoodJournal");
                 // Incomplete, requires override of onPrepareOptionsMenu
                 invalidateOptionsMenu();
             }
@@ -62,6 +63,13 @@ public class DefaultActivity extends AppCompatActivity {
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        if (menuItem.getTitle().equals("Log Out")) {
+                            Intent i = new Intent(DefaultActivity.this, LoginActivity.class);
+                            startActivity(i);
+                            finish();
+                        } else {
+                            getSupportActionBar().setTitle(menuItem.getTitle());
+                        }
                         menuItem.setChecked(true);
                         mDrawerLayout.closeDrawers();
                         return true;
