@@ -45,9 +45,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "test:password"
-    };
+    private static ArrayList<String> DUMMY_CREDENTIALS = new ArrayList<String>(){{
+            add("test:password");
+    }};
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -274,7 +274,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
 
-            // TODO: register the new account here.
+            DUMMY_CREDENTIALS.add(mEmail + ":" + mPassword);
             return true;
         }
 
