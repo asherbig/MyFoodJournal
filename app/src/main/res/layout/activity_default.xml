@@ -7,6 +7,7 @@
     android:fitsSystemWindows="true" >
     <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="team7202.myfoodjournal.DefaultActivity">
@@ -25,8 +26,6 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         </android.support.design.widget.AppBarLayout>
-
-        <include layout="@layout/content_default" />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab"
