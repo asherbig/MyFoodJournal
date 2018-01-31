@@ -2,6 +2,7 @@ package team7202.myfoodjournal;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -78,7 +79,7 @@ public class DefaultActivity extends AppCompatActivity {
                             finish();
                         } else {
                             selectNavOption(layout);
-
+                          
                             // Updates selected item and title, then closes the drawer
                             menuItem.setChecked(true);
                             ab.setTitle(menuItem.getTitle());
