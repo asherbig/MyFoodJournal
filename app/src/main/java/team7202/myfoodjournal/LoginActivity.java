@@ -85,6 +85,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 attemptLogin();
             }
         });
+        Button mRegisterButton = (Button) findViewById(R.id.register_button);
+        mRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptRegister();
+            }
+        });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -140,6 +147,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
         }
+    }
+
+    private void attemptRegister() {
+        if (mAuthTask != null) {
+            return;
+        }
+        // Reset errors.
+        mUsernameView.setError(null);
+        mPasswordView.setError(null);
+
+        // TODO These will need to be stored in the database
+        String username = mUsernameView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        mAuthTask = new UserLoginTask(username, password);
+        mAuthTask.execute((Void) null);
     }
 
     private boolean isUsernameValid(String username) {
