@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.lang.reflect.Field;
 
@@ -66,6 +67,11 @@ public class DefaultActivity extends AppCompatActivity {
         // Sets the Home page menu option as selected by default.
         mNavigationView.getMenu().getItem(0).setChecked(true);
         ab.setTitle(mNavigationView.getMenu().getItem(0).getTitle());
+
+        // Sets the username in the navigation header
+        View headerView = mNavigationView.getHeaderView(0);
+        TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
+        navUsername.setText(UsernameSingleton.getInstance().getUsername());
 
         // Creates listener for events when clicking on navigation drawer options.
         mNavigationView.setNavigationItemSelectedListener(
