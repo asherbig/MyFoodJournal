@@ -3,6 +3,7 @@ package team7202.myfoodjournal;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -44,9 +45,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "test:password"
-    };
+    private static ArrayList<String> DUMMY_CREDENTIALS = new ArrayList<String>(){{
+            add("test:password");
+    }};
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -82,6 +83,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+        Button mRegisterButton = (Button) findViewById(R.id.register_button);
+        mRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptRegister();
             }
         });
 
@@ -139,6 +147,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = new UserLoginTask(username, password);
             mAuthTask.execute((Void) null);
         }
+    }
+
+    private void attemptRegister() {
+        if (mAuthTask != null) {
+            return;
+        }
+        // Reset errors.
+        mUsernameView.setError(null);
+        mPasswordView.setError(null);
+
+        // TODO These will need to be stored in the database
+        String username = mUsernameView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        mAuthTask = new UserLoginTask(username, password);
+        mAuthTask.execute((Void) null);
     }
 
     private boolean isUsernameValid(String username) {
@@ -268,16 +292,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
-                    if (pieces[1].equals(mPassword)) {
-                        // Account exists, return true if the password matches.
-                        UsernameSingleton.getInstance().setUsername(mEmail);
-                        return true;
-                    }
+                    // Account exists, return true if the password matches.
+                    return pieces[1].equals(mPassword);
                 }
             }
 
-            // TODO: register the new account here.
-            return false;
+            DUMMY_CREDENTIALS.add(mEmail + ":" + mPassword);
+            return true;
         }
 
         @Override
@@ -301,3 +322,4 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 }
+
