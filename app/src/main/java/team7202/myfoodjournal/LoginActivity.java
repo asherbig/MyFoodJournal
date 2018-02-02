@@ -20,6 +20,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,6 +30,13 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +95,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        FirebaseApp.initializeApp(this);
     }
 
     /**
@@ -99,46 +109,66 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return;
         }
 
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("ben");
+
+        myRef.setValue("Hello, World!");
+
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String username = mUsernameView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String enteredUsername = mUsernameView.getText().toString();
+        final String enteredPassword = mPasswordView.getText().toString();
 
-        boolean cancel = false;
-        View focusView = null;
+        DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(enteredUsername);
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
+        String actualPassword = new String();
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(username)) {
-            mUsernameView.setError(getString(R.string.error_field_required));
-            focusView = mUsernameView;
-            cancel = true;
-        } else if (!isUsernameValid(username)) {
-            mUsernameView.setError(getString(R.string.error_invalid_email));
-            focusView = mUsernameView;
-            cancel = true;
-        }
+        loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String actualPassword = (String) dataSnapshot.getValue();
 
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(username, password);
-            mAuthTask.execute((Void) null);
-        }
+                boolean cancel = false;
+                View focusView = null;
+
+                // Check for a valid password, if the user entered one.
+                if (TextUtils.isEmpty(enteredPassword) || !isPasswordValid(enteredPassword)) {
+                    mPasswordView.setError(getString(R.string.error_invalid_password));
+                    focusView = mPasswordView;
+                    cancel = true;
+                }
+
+                // Check for a valid email address.
+                if (TextUtils.isEmpty(enteredPassword)) {
+                    mUsernameView.setError(getString(R.string.error_field_required));
+                    focusView = mUsernameView;
+                    cancel = true;
+                } else if (!isUsernameValid(enteredPassword)) {
+                    mUsernameView.setError(getString(R.string.error_invalid_email));
+                    focusView = mUsernameView;
+                    cancel = true;
+                }
+
+                if (cancel) {
+                    // There was an error; don't attempt login and focus the first
+                    // form field with an error.
+                    focusView.requestFocus();
+                } else if (enteredPassword.equals(actualPassword)) {
+                    // Show a progress spinner, and kick off a background task to
+                    // perform the user login attempt.
+                    showProgress(true);
+                    mAuthTask = new UserLoginTask(enteredUsername, enteredPassword);
+                    mAuthTask.execute((Void) null);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private boolean isUsernameValid(String username) {
