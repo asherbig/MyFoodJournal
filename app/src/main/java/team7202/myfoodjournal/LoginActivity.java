@@ -298,18 +298,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (InterruptedException e) {
                 return false;
             }
-
-//            for (String credential : DUMMY_CREDENTIALS) {
-//                String[] pieces = credential.split(":");
-//                if (pieces[0].equals(mEmail)) {
-//                    // Account exists, return true if the password matches.
-//                    UsernameSingleton.getInstance().setUsername(mEmail);
-//                    return pieces[1].equals(mPassword);
-//                }
-//            }
-
-//            DUMMY_CREDENTIALS.add(mEmail + ":" + mPassword);
-//            UsernameSingleton.getInstance().setUsername(mEmail);
+          
 
             DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(mEmail);
 
@@ -328,7 +317,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                  
                 }
             });
 
