@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "179924392437",
+    "firebase_url": "https://myfoodjournal-ad03b.firebaseio.com",
+    "project_id": "myfoodjournal-ad03b",
+    "storage_bucket": "myfoodjournal-ad03b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:179924392437:android:2e90d34d814de658",
+        "android_client_info": {
+          "package_name": "team7202.myfoodjournal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "179924392437-pdsv95hvdf2gccfonimt68h5klpl7brt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWFhxfC6y8S6diAYYzcN86fnYscaDxZLM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
