@@ -3,6 +3,7 @@ package team7202.myfoodjournal;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -31,7 +32,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -52,9 +52,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "test:password"
-    };
+    private static ArrayList<String> DUMMY_CREDENTIALS = new ArrayList<String>(){{
+        add("test:password");
+    }};
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -92,11 +92,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 attemptLogin();
             }
         });
+        Button mRegisterButton = (Button) findViewById(R.id.register_button);
+        mRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptRegister();
+            }
+        });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
-        FirebaseApp.initializeApp(this);
     }
 
     /**
@@ -109,66 +114,65 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return;
         }
 
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference("ben");
-
-        myRef.setValue("Hello, World!");
-
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        final String enteredUsername = mUsernameView.getText().toString();
-        final String enteredPassword = mPasswordView.getText().toString();
+        String username = mUsernameView.getText().toString();
+        String password = mPasswordView.getText().toString();
 
-        DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(enteredUsername);
+        boolean cancel = false;
+        View focusView = null;
 
-        String actualPassword = new String();
+        // Check for a valid password, if the user entered one.
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+            mPasswordView.setError(getString(R.string.error_invalid_password));
+            focusView = mPasswordView;
+            cancel = true;
+        }
 
-        loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String actualPassword = (String) dataSnapshot.getValue();
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(username)) {
+            mUsernameView.setError(getString(R.string.error_field_required));
+            focusView = mUsernameView;
+            cancel = true;
+        } else if (!isUsernameValid(username)) {
+            mUsernameView.setError(getString(R.string.error_invalid_email));
+            focusView = mUsernameView;
+            cancel = true;
+        }
 
-                boolean cancel = false;
-                View focusView = null;
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        } else {
+            // Show a progress spinner, and kick off a background task to
+            // perform the user login attempt.
+            showProgress(true);
+            mAuthTask = new UserLoginTask(username, password);
+            mAuthTask.execute((Void) null);
+        }
+    }
 
-                // Check for a valid password, if the user entered one.
-                if (TextUtils.isEmpty(enteredPassword) || !isPasswordValid(enteredPassword)) {
-                    mPasswordView.setError(getString(R.string.error_invalid_password));
-                    focusView = mPasswordView;
-                    cancel = true;
-                }
+    private void attemptRegister() {
+        if (mAuthTask != null) {
+            return;
+        }
+        // Reset errors.
+        mUsernameView.setError(null);
+        mPasswordView.setError(null);
 
-                // Check for a valid email address.
-                if (TextUtils.isEmpty(enteredPassword)) {
-                    mUsernameView.setError(getString(R.string.error_field_required));
-                    focusView = mUsernameView;
-                    cancel = true;
-                } else if (!isUsernameValid(enteredPassword)) {
-                    mUsernameView.setError(getString(R.string.error_invalid_email));
-                    focusView = mUsernameView;
-                    cancel = true;
-                }
+        // TODO These will need to be stored in the database
+        String username = mUsernameView.getText().toString();
+        String password = mPasswordView.getText().toString();
 
-                if (cancel) {
-                    // There was an error; don't attempt login and focus the first
-                    // form field with an error.
-                    focusView.requestFocus();
-                } else if (enteredPassword.equals(actualPassword)) {
-                    // Show a progress spinner, and kick off a background task to
-                    // perform the user login attempt.
-                    showProgress(true);
-                    mAuthTask = new UserLoginTask(enteredUsername, enteredPassword);
-                    mAuthTask.execute((Void) null);
-                }
-            }
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        rootRef.child(username).setValue(password);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+//        mAuthTask = new UserLoginTask(username, password);
+//        mAuthTask.execute((Void) null);
     }
 
     private boolean isUsernameValid(String username) {
@@ -295,16 +299,51 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+//            for (String credential : DUMMY_CREDENTIALS) {
+//                String[] pieces = credential.split(":");
+//                if (pieces[0].equals(mEmail)) {
+//                    // Account exists, return true if the password matches.
+//                    UsernameSingleton.getInstance().setUsername(mEmail);
+//                    return pieces[1].equals(mPassword);
+//                }
+//            }
+
+//            DUMMY_CREDENTIALS.add(mEmail + ":" + mPassword);
+//            UsernameSingleton.getInstance().setUsername(mEmail);
+
+            DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(mEmail);
+
+            final StringBuilder loginSuccess = new StringBuilder("");
+
+            loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String actualPassword = (String) dataSnapshot.getValue();
+
+                    if (actualPassword != null && actualPassword.equals(mPassword)) {
+                        UsernameSingleton.getInstance().setUsername(mEmail);
+                        loginSuccess.append("true");
+                    }
                 }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            //wait for async to check password
+            try {
+                Thread.sleep(2000);
+            } catch(InterruptedException e){
+                System.out.println("got interrupted!");
             }
 
-            // TODO: register the new account here.
-            return true;
+            if (loginSuccess.toString().equals("true") ) {
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
@@ -328,4 +367,3 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 }
-
