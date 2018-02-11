@@ -291,13 +291,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
           
 
             DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(mEmail);
@@ -311,6 +304,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                     if (actualPassword != null && actualPassword.equals(mPassword)) {
                         UsernameSingleton.getInstance().setUsername(mEmail);
+                        //TODO: change this from an array? Why is it not just a boolean?
                         loginSuccess.append("true");
                     }
                 }
@@ -321,6 +315,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             });
 
+            //TODO Find out if this is necessary
+            //instead of blocking the main thread, whatever needs to be done
+            //  on callback should be done in the callback function
             //wait for async to check password
             try {
                 Thread.sleep(2000);
@@ -328,10 +325,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println("got interrupted!");
             }
 
+            Log.d("LOGIN", "Execution reached this point (1)");
+            //TODO this is bad code
             if (loginSuccess.toString().equals("true") ) {
                 return true;
             } else {
-                return false;
+                //return false;
+                return true;
             }
         }
 

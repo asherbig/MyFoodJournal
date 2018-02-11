@@ -26,7 +26,7 @@ import android.widget.TextView;
 
 import java.lang.reflect.Field;
 
-public class DefaultActivity extends AppCompatActivity {
+public class DefaultActivity extends AppCompatActivity implements ProfileFragment.OnProfileInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -115,6 +115,9 @@ public class DefaultActivity extends AppCompatActivity {
             case R.id.nav_myreviews:
                 layoutName = "content_myreviews";
                 break;
+            case R.id.nav_profile:
+                layoutName = "fragment_profile";
+                break;
             case R.id.nav_logout:
                 layoutName = "Log Out";
         }
@@ -124,13 +127,18 @@ public class DefaultActivity extends AppCompatActivity {
     /** Swaps fragments in the default activity. */
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
-        Fragment fragment = new PageFragment();
-        Bundle args = new Bundle();
-        args.putString(PageFragment.ARG_MENU_OPTION, option);
-        fragment.setArguments(args);
+        if (option == "fragment_profile") {
+            Fragment fragment = ProfileFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else {
+            Fragment fragment = new PageFragment();
+            Bundle args = new Bundle();
+            args.putString(PageFragment.ARG_MENU_OPTION, option);
+            fragment.setArguments(args);
 
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        }
     }
 
     @Override
@@ -169,4 +177,20 @@ public class DefaultActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    //methods for the profile interface
+    //opens the edit profile screen
+    @Override
+    public void onEditButtonClicked() {
+        Log.d("PROFILE", "Edit profile clicked");
+        //TODO make this start the edit profile fragment
+    }
+
+    //opens the edit password screen
+    @Override
+    public void onChangePassClicked() {
+        Log.d("PROFILE", "Change password clicked");
+        //TODO make this start the edit password fragment
+    }
+
 }
