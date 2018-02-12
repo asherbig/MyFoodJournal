@@ -21,7 +21,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,12 +30,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +46,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * TODO: remove after connecting to a real authentication system.
      */
     private static ArrayList<String> DUMMY_CREDENTIALS = new ArrayList<String>(){{
-        add("test:password");
+            add("test:password");
     }};
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -168,11 +161,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-        rootRef.child(username).setValue(password);
-
-//        mAuthTask = new UserLoginTask(username, password);
-//        mAuthTask.execute((Void) null);
+        mAuthTask = new UserLoginTask(username, password);
+        mAuthTask.execute((Void) null);
     }
 
     private boolean isUsernameValid(String username) {
@@ -291,48 +281,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         @Override
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
-          
 
-            DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(mEmail);
-
-            final StringBuilder loginSuccess = new StringBuilder("");
-
-            loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String actualPassword = (String) dataSnapshot.getValue();
-
-                    if (actualPassword != null && actualPassword.equals(mPassword)) {
-                        UsernameSingleton.getInstance().setUsername(mEmail);
-                        //TODO: change this from an array? Why is it not just a boolean?
-                        loginSuccess.append("true");
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                  
-                }
-            });
-
-            //TODO Find out if this is necessary
-            //instead of blocking the main thread, whatever needs to be done
-            //  on callback should be done in the callback function
-            //wait for async to check password
             try {
+                // Simulate network access.
                 Thread.sleep(2000);
-            } catch(InterruptedException e){
-                System.out.println("got interrupted!");
+            } catch (InterruptedException e) {
+                return false;
             }
 
-            Log.d("LOGIN", "Execution reached this point (1)");
-            //TODO this is bad code
-            if (loginSuccess.toString().equals("true") ) {
-                return true;
-            } else {
-                //return false;
-                return true;
+            for (String credential : DUMMY_CREDENTIALS) {
+                String[] pieces = credential.split(":");
+                if (pieces[0].equals(mEmail)) {
+                    // Account exists, return true if the password matches.
+                    UsernameSingleton.getInstance().setUsername(mEmail);
+                    return pieces[1].equals(mPassword);
+                }
             }
+
+            DUMMY_CREDENTIALS.add(mEmail + ":" + mPassword);
+            UsernameSingleton.getInstance().setUsername(mEmail);
+            return true;
         }
 
         @Override
@@ -356,3 +324,4 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 }
+

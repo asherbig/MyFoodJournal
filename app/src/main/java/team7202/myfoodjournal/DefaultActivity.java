@@ -26,10 +26,7 @@ import android.widget.TextView;
 
 import java.lang.reflect.Field;
 
-public class DefaultActivity extends AppCompatActivity
-        implements ProfileFragment.OnProfileInteractionListener,
-        EditProfileFragment.OnEditProfileListener,
-        EditPasswordFragment.OnEditPasswordListener {
+public class DefaultActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -118,9 +115,6 @@ public class DefaultActivity extends AppCompatActivity
             case R.id.nav_myreviews:
                 layoutName = "content_myreviews";
                 break;
-            case R.id.nav_profile:
-                layoutName = "fragment_profile";
-                break;
             case R.id.nav_logout:
                 layoutName = "Log Out";
         }
@@ -130,24 +124,13 @@ public class DefaultActivity extends AppCompatActivity
     /** Swaps fragments in the default activity. */
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
-        if (option == "fragment_profile") {
-            Fragment fragment = ProfileFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragment_edit_profile") {
-            Fragment fragment = EditProfileFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragment_edit_password") {
-            Fragment fragment = EditPasswordFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else {
-            Fragment fragment = new PageFragment();
-            Bundle args = new Bundle();
-            args.putString(PageFragment.ARG_MENU_OPTION, option);
-            fragment.setArguments(args);
+        Fragment fragment = new PageFragment();
+        Bundle args = new Bundle();
+        args.putString(PageFragment.ARG_MENU_OPTION, option);
+        fragment.setArguments(args);
 
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-        }
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
     @Override
@@ -186,67 +169,4 @@ public class DefaultActivity extends AppCompatActivity
         }
         return super.onOptionsItemSelected(item);
     }
-
-    //methods for the profile interface
-    //opens the edit profile screen
-    @Override
-    public void onEditButtonClicked() {
-        Log.d("PROFILE", "Edit profile clicked");
-
-        selectNavOption("fragment_edit_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Edit Profile");
-    }
-
-    //opens the edit password screen
-    @Override
-    public void onChangePassClicked() {
-        Log.d("PROFILE", "Change password clicked");
-        selectNavOption("fragment_edit_password");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Edit Password");
-    }
-
-    //methods for the edit profile interface
-    //returns to the profile screen
-    @Override
-    public void onProfileSaveClicked() {
-        //TODO make the menuItem be currently selected
-        Log.d("PROFILE EDIT", "Save profile button clicked");
-        selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
-    }
-
-    //returns to the profile summary screen
-    @Override
-    public void onProfileCancelClicked() {
-        //TODO make the menuItem be currently selected
-        Log.d("PROFILE EDIT", "Cancel profile edit button clicked");
-        selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
-    }
-
-    //methods for the edit password fragment interface
-    //returns to the profile screen
-    @Override
-    public void onPassSaveClicked() {
-        //TODO make the menuItem be currently selected
-        Log.d("PROFILE EDIT", "Save password button clicked");
-        selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
-    }
-
-    //returns to the profile summary screen
-    @Override
-    public void onPassCancelClicked() {
-        //TODO make the menuItem be currently selected
-        Log.d("PROFILE EDIT", "Cancel password edit button clicked");
-        selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
-    }
-
 }
