@@ -22,6 +22,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import java.lang.reflect.Field;
@@ -29,7 +31,8 @@ import java.lang.reflect.Field;
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
         EditProfileFragment.OnEditProfileListener,
-        EditPasswordFragment.OnEditPasswordListener {
+        EditPasswordFragment.OnEditPasswordListener,
+        WishlistFragment.OnWishlistInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -116,13 +119,17 @@ public class DefaultActivity extends AppCompatActivity
                 layoutName = "content_default";
                 break;
             case R.id.nav_myreviews:
-                layoutName = "content_myreviews";
+                layoutName = "fragment_myreviews";
                 break;
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
                 break;
+            case R.id.nav_wishlist:
+                layoutName = "fragment_wishlist";
+                break;
             case R.id.nav_logout:
                 layoutName = "Log Out";
+                break;
         }
         return layoutName;
     }
@@ -138,6 +145,9 @@ public class DefaultActivity extends AppCompatActivity
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option == "fragment_edit_password") {
             Fragment fragment = EditPasswordFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else if (option == "fragment_wishlist") {
+            Fragment fragment = WishlistFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();
@@ -163,13 +173,13 @@ public class DefaultActivity extends AppCompatActivity
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_default, menu);
-        return true;
-    }
-
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_default, menu);
+//        return true;
+//    }
+//
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         /* Pass the event to ActionBarDrawerToggle, if it returns true, then it has
@@ -249,4 +259,41 @@ public class DefaultActivity extends AppCompatActivity
         ab.setTitle("Profile");
     }
 
+    @Override
+    public void onFilterButtonClicked() {
+        Log.d("WISHLIST", "Filters button clicked on Wishlist page");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Filter");
+    }
+
+    @Override
+    public void onSortByButtonClicked() {
+        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        final View anchor = findViewById(R.id.sortby_button);
+        PopupMenu popup = new PopupMenu(this, anchor);
+        getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
+        popup.getMenu().getItem(0).setChecked(true);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                // TODO: Add code for filtering list of entries
+                switch (menuItem.getItemId()) {
+                    case R.id.sortby_mostrecent:
+                        break;
+                    case R.id.sortby_rating:
+                        break;
+                    case R.id.sortby_restaurant:
+                        break;
+                    case R.id.sortby_food:
+                        break;
+                }
+                Button sortByButton = (Button) anchor;
+                sortByButton.setText("Sort By: \n" + menuItem.getTitle());
+                menuItem.setChecked(true);
+                return true;
+            }
+        });
+
+        popup.show();
+    }
 }
