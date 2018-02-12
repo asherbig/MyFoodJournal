@@ -83,7 +83,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            //Calling the method through mListener will run the code in the default activity
+            // Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
             case (R.id.filters_button):
                 if (mListener != null) {

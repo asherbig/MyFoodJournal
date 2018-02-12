@@ -2,10 +2,8 @@ package team7202.myfoodjournal;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -15,24 +13,19 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Layout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.TextView;
-
-import java.lang.reflect.Field;
 
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
         EditProfileFragment.OnEditProfileListener,
         EditPasswordFragment.OnEditPasswordListener,
-        WishlistFragment.OnWishlistInteractionListener {
+        WishlistFragment.OnWishlistInteractionListener,
+        FilterMenuDialogFragment.OnFilterInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -262,8 +255,14 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onFilterButtonClicked() {
         Log.d("WISHLIST", "Filters button clicked on Wishlist page");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Filter");
+        FilterMenuDialogFragment filterMenu = new FilterMenuDialogFragment();
+        FragmentManager fm = getFragmentManager();
+        filterMenu.show(fm, "Filter Menu generated");
+    }
+
+    @Override
+    public void onRestaurantFieldClicked() {
+
     }
 
     @Override
@@ -272,7 +271,6 @@ public class DefaultActivity extends AppCompatActivity
         final View anchor = findViewById(R.id.sortby_button);
         PopupMenu popup = new PopupMenu(this, anchor);
         getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
-        popup.getMenu().getItem(0).setChecked(true);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
@@ -289,7 +287,6 @@ public class DefaultActivity extends AppCompatActivity
                 }
                 Button sortByButton = (Button) anchor;
                 sortByButton.setText("Sort By: \n" + menuItem.getTitle());
-                menuItem.setChecked(true);
                 return true;
             }
         });
