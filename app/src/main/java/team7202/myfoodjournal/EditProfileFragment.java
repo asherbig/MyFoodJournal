@@ -4,7 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,22 +13,21 @@ import android.widget.Button;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ProfileFragment.OnProfileInteractionListener} interface
+ * {@link EditProfileFragment.OnEditProfileListener} interface
  * to handle interaction events.
- * Use the {@link ProfileFragment#newInstance} factory method to
+ * Use the {@link EditProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment implements View.OnClickListener {
-
+public class EditProfileFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_MENU_OPTION = "menu_option";
 
     //parameters
     private String menuOptionParam;
 
-    private OnProfileInteractionListener mListener;
+    private OnEditProfileListener mListener;
     private View view;
 
-    public ProfileFragment() {
+    public EditProfileFragment() {
         // Required empty public constructor
     }
 
@@ -38,10 +36,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
      * this fragment using the provided parameters.
      *
      * @param menuOptionParam the menu option being initialized.
-     * @return A new instance of fragment ProfileFragment.
+     * @return A new instance of fragment EditProfileFragment.
      */
-    public static ProfileFragment newInstance(String menuOptionParam) {
-        ProfileFragment fragment = new ProfileFragment();
+    public static EditProfileFragment newInstance(String menuOptionParam) {
+        EditProfileFragment fragment = new EditProfileFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MENU_OPTION, menuOptionParam);
         fragment.setArguments(args);
@@ -60,19 +58,20 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_profile, container, false);
-        Button editButton = (Button) view.findViewById(R.id.edit_button);
-        editButton.setOnClickListener(this);
-        Button passButton = (Button) view.findViewById(R.id.change_pass_button);
-        passButton.setOnClickListener(this);
+        view = inflater.inflate(R.layout.fragment_edit_profile, container, false);
+        Button saveButton = (Button) view.findViewById(R.id.save_button);
+        saveButton.setOnClickListener(this);
+        Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
+        cancelButton.setOnClickListener(this);
         return view;
     }
+
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnProfileInteractionListener) {
-            mListener = (OnProfileInteractionListener) context;
+        if (context instanceof OnEditProfileListener) {
+            mListener = (OnEditProfileListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -91,18 +90,19 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             //Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
-            case (R.id.edit_button):
+            case (R.id.save_button):
                 if (mListener != null) {
-                    mListener.onEditButtonClicked();
+                    mListener.onProfileSaveClicked();
                 }
                 break;
-            case (R.id.change_pass_button):
+            case (R.id.cancel_button):
                 if (mListener != null) {
-                    mListener.onChangePassClicked();
+                    mListener.onProfileCancelClicked();
                 }
                 break;
         }
     }
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -114,9 +114,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnProfileInteractionListener {
-        // TODO: Update argument type and name
-        void onEditButtonClicked();
-        void onChangePassClicked();
+    public interface OnEditProfileListener {
+        void onProfileSaveClicked();
+        void onProfileCancelClicked();
     }
 }
