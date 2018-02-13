@@ -26,6 +26,9 @@
         <activity
             android:name=".DefaultActivity"
             android:label="@string/title_activity_login"></activity>
+        <activity android:name=".RegisterActivity"/>
+
+
     </application>
 
 </manifest>

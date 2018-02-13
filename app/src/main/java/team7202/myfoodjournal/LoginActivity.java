@@ -157,22 +157,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void attemptRegister() {
-        if (mAuthTask != null) {
-            return;
-        }
-        // Reset errors.
-        mUsernameView.setError(null);
-        mPasswordView.setError(null);
-
-        // TODO These will need to be stored in the database
-        String username = mUsernameView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-        rootRef.child(username).setValue(password);
-
-//        mAuthTask = new UserLoginTask(username, password);
-//        mAuthTask.execute((Void) null);
+        //Go to Registration Intent
+        Intent i = new Intent(LoginActivity.this, RegisterActivity.class);
+        startActivity(i);
+        finish();
     }
 
     private boolean isUsernameValid(String username) {
