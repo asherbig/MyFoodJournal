@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/sortby_mostrecent"
+        android:title="Most Recent" />
+    <item
+        android:id="@+id/sortby_rating"
+        android:title="Rating" />
+    <item
+        android:id="@+id/sortby_restaurant"
+        android:title="Restaurant Name" />
+    <item
+        android:id="@+id/sortby_food"
+        android:title="Food Name" />
+</menu>
