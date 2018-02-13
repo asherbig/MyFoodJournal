@@ -26,7 +26,8 @@ public class DefaultActivity extends AppCompatActivity
         EditPasswordFragment.OnEditPasswordListener,
         WishlistFragment.OnWishlistInteractionListener,
         FilterMenuDialogFragment.OnFilterInteractionListener,
-        MyReviewsFragment.OnMyReviewsInteractionListener {
+        MyReviewsFragment.OnMyReviewsInteractionListener,
+        AddReviewFragment.OnAddReviewListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -119,20 +120,23 @@ public class DefaultActivity extends AppCompatActivity
     /** Swaps fragments in the default activity. */
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
-        if (option == "fragment_profile") {
+        if (option.equals("fragment_profile")) {
             Fragment fragment = ProfileFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragment_edit_profile") {
+        } else if (option.equals("fragment_edit_profile")) {
             Fragment fragment = EditProfileFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragment_edit_password") {
+        } else if (option.equals("fragment_edit_password")) {
             Fragment fragment = EditPasswordFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragment_wishlist") {
+        } else if (option.equals("fragment_wishlist")) {
             Fragment fragment = WishlistFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragment_myreviews") {
+        } else if (option.equals("fragment_myreviews")) {
             Fragment fragment = MyReviewsFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else if (option.equals("fragment_add_review")) {
+            Fragment fragment = AddReviewFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();
@@ -288,8 +292,25 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFloatingButtonClicked() {
-        final View view = findViewById(R.id.fab);
-        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        Log.d("ADD REVIEW", "Add review floating button clicked.");
+        selectNavOption("fragment_add_review");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Add Review");
+    }
+
+    @Override
+    public void onSaveReviewClicked() {
+        Log.d("SAVE REVIEW", "Saved review written by user.");
+        selectNavOption("fragment_myreviews");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("My Reviews");
+    }
+
+    @Override
+    public void onAddReviewCancelClicked() {
+        Log.d("CANCEL REVIEW", "Canceled review written by user.");
+        selectNavOption("fragment_myreviews");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("My Reviews");
     }
 }
