@@ -25,7 +25,8 @@ public class DefaultActivity extends AppCompatActivity
         EditProfileFragment.OnEditProfileListener,
         EditPasswordFragment.OnEditPasswordListener,
         WishlistFragment.OnWishlistInteractionListener,
-        FilterMenuDialogFragment.OnFilterInteractionListener {
+        FilterMenuDialogFragment.OnFilterInteractionListener,
+        MyReviewsFragment.OnMyReviewsInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -33,7 +34,7 @@ public class DefaultActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
-        selectNavOption("content_default");
+        selectNavOption("fragment_myreviews");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -94,23 +95,11 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private String getLayoutName(int resourceId) {
         String layoutName = "";
         switch(resourceId) {
-            case R.id.nav_home:
-                layoutName = "content_default";
-                break;
             case R.id.nav_myreviews:
                 layoutName = "fragment_myreviews";
                 break;
@@ -141,6 +130,9 @@ public class DefaultActivity extends AppCompatActivity
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option == "fragment_wishlist") {
             Fragment fragment = WishlistFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else if (option == "fragmnet_myreviews") {
+            Fragment fragment = MyReviewsFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();
@@ -292,5 +284,12 @@ public class DefaultActivity extends AppCompatActivity
         });
 
         popup.show();
+    }
+
+    @Override
+    public void onFloatingButtonClicked() {
+        final View view = findViewById(R.id.fab);
+        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 }
