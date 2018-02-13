@@ -168,8 +168,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
-        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
-        rootRef.child(username).setValue(password);
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid password, if the user entered one.
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+            mPasswordView.setError(getString(R.string.error_invalid_password));
+            focusView = mPasswordView;
+            cancel = true;
+        }
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(username)) {
+            mUsernameView.setError(getString(R.string.error_field_required));
+            focusView = mUsernameView;
+            cancel = true;
+        } else if (!isUsernameValid(username)) {
+            mUsernameView.setError(getString(R.string.error_invalid_email));
+            focusView = mUsernameView;
+            cancel = true;
+        }
+
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+        } else {
+            DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+            rootRef.child(username).setValue(password);
+        }
 
 //        mAuthTask = new UserLoginTask(username, password);
 //        mAuthTask.execute((Void) null);
@@ -330,8 +357,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if (loginSuccess.toString().equals("true") ) {
                 return true;
             } else {
-                //return false;
-                return true;
+                return false;
             }
         }
 

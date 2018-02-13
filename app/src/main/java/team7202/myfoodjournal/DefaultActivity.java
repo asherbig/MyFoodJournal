@@ -131,7 +131,7 @@ public class DefaultActivity extends AppCompatActivity
         } else if (option == "fragment_wishlist") {
             Fragment fragment = WishlistFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } else if (option == "fragmnet_myreviews") {
+        } else if (option == "fragment_myreviews") {
             Fragment fragment = MyReviewsFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
