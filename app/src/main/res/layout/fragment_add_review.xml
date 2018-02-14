@@ -1,107 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
-    <LinearLayout
-        android:id="@+id/add_review_layout"
+
+    <ScrollView
+        android:id="@+id/add_review_form"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="70dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Add a Review"
-            android:textSize="25sp"
-            android:id="@+id/add_title_header"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Restaurant"
-            android:textSize="20sp"
-            android:id="@+id/set_restaurant_header"/>
-
-        <EditText
-            android:id="@+id/restaurant_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Restaurant Name"
-            android:inputType="text"
-            android:textSize="20sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rating"
-            android:textSize="20sp"
-            android:id="@+id/set_rating_header"/>
-
+        android:layout_height="match_parent"
+        android:layout_marginTop="70dp">
         <LinearLayout
+            android:id="@+id/add_review_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/rating_entry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:hint="0"
-                android:inputType="numberSigned"
-                android:textSize="20sp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="/ 5"
+                android:layout_gravity="center"
+                android:text="Add a Review"
+                android:textSize="25sp"
+                android:id="@+id/add_title_header"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Restaurant"
                 android:textSize="20sp"
-                android:id="@+id/max_rating_header"/>
-        </LinearLayout>
+                android:id="@+id/set_restaurant_header"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Description"
-            android:textSize="20sp"
-            android:id="@+id/set_description_header"/>
+            <EditText
+                android:id="@+id/restaurant_entry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Restaurant Name"
+                android:inputType="text"
+                android:textSize="20sp" />
 
-        <EditText
-            android:id="@+id/description_entry"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Describe your experience"
-            android:inputType="textMultiLine"
-            android:textSize="20sp" />
-
-        <LinearLayout
-            android:id="@+id/button_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/save_button"
-                style="?android:textAppearanceSmall"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"
-                android:text="Save"
-                android:textStyle="bold" />
+                android:text="Rating"
+                android:textSize="20sp"
+                android:id="@+id/set_rating_header"/>
 
-            <Button
-                android:id="@+id/cancel_button"
-                style="?android:textAppearanceSmall"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/rating_entry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="0"
+                    android:inputType="numberSigned"
+                    android:textSize="20sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/ 5"
+                    android:textSize="20sp"
+                    android:id="@+id/max_rating_header"/>
+            </LinearLayout>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"
-                android:text="Cancel"
-                android:textStyle="bold" />
+                android:text="Description"
+                android:textSize="20sp"
+                android:id="@+id/set_description_header"/>
+
+            <EditText
+                android:id="@+id/description_entry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Describe your experience"
+                android:inputType="textMultiLine"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:id="@+id/button_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/save_button"
+                    style="?android:textAppearanceSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Save"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/cancel_button"
+                    style="?android:textAppearanceSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Cancel"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
         </LinearLayout>
-
-    </LinearLayout>
+    </ScrollView>
 </RelativeLayout>
