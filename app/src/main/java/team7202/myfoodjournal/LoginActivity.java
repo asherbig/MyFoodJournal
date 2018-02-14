@@ -48,18 +48,6 @@ import static android.Manifest.permission.READ_CONTACTS;
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static ArrayList<String> DUMMY_CREDENTIALS = new ArrayList<String>(){{
-        add("test:password");
-    }};
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
     // UI references.
     private AutoCompleteTextView mUsernameView;
     private EditText mPasswordView;
@@ -70,6 +58,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         // Set up the login form.
         mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
 
@@ -110,17 +99,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
 
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String username = mUsernameView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        final String username = mUsernameView.getText().toString();
+        final String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
@@ -151,15 +137,34 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(username, password);
-            mAuthTask.execute((Void) null);
+
+            DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(username);
+
+            loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String actualPassword = (String) dataSnapshot.getValue();
+
+                    showProgress(false);
+                    if (actualPassword != null && actualPassword.equals(password)) {
+                        Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
+                        startActivity(i);
+                        finish();
+                    } else {
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 
     private void attemptRegister() {
-        if (mAuthTask != null) {
-            return;
-        }
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
@@ -197,9 +202,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
             rootRef.child(username).setValue(password);
         }
-
-//        mAuthTask = new UserLoginTask(username, password);
-//        mAuthTask.execute((Void) null);
+        
     }
 
     private boolean isUsernameValid(String username) {
@@ -300,85 +303,5 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-          
-
-            DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(mEmail);
-
-            final StringBuilder loginSuccess = new StringBuilder("");
-
-            loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String actualPassword = (String) dataSnapshot.getValue();
-
-                    if (actualPassword != null && actualPassword.equals(mPassword)) {
-                        UsernameSingleton.getInstance().setUsername(mEmail);
-                        //TODO: change this from an array? Why is it not just a boolean?
-                        loginSuccess.append("true");
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                  
-                }
-            });
-
-            //TODO Find out if this is necessary
-            //instead of blocking the main thread, whatever needs to be done
-            //  on callback should be done in the callback function
-            //wait for async to check password
-            try {
-                Thread.sleep(2000);
-            } catch(InterruptedException e){
-                System.out.println("got interrupted!");
-            }
-
-            Log.d("LOGIN", "Execution reached this point (1)");
-            //TODO this is bad code
-            if (loginSuccess.toString().equals("true") ) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-            if (success) {
-                Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
-                startActivity(i);
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
     }
 }
