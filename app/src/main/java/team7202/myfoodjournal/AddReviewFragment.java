@@ -111,7 +111,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
             // which should swap the fragment to go to the right fragment
             case (R.id.save_button):
                 if (mListener != null) {
-                    mListener.onSaveReviewClicked(restaurantName.getId(), menuitem.getText().toString(), Integer.valueOf(rating.getText().toString()), description.getText().toString());
+                    mListener.onSaveReviewClicked(restaurantName.getId(), restaurantName.getName().toString(), menuitem.getText().toString(), Integer.valueOf(rating.getText().toString()), description.getText().toString());
                 }
                 break;
             case (R.id.cancel_button):
@@ -134,7 +134,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      */
     public interface OnAddReviewListener {
         // TODO: Update argument type and name
-        void onSaveReviewClicked(String id, String menuitem, int rating, String description);
+        void onSaveReviewClicked(String id, String name, String menuitem, int rating, String description);
         void onAddReviewCancelClicked();
     }
 }

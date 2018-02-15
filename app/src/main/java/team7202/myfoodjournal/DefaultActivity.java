@@ -27,6 +27,9 @@ import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
         EditProfileFragment.OnEditProfileListener,
@@ -40,6 +43,8 @@ public class DefaultActivity extends AppCompatActivity
     private NavigationView mNavigationView;
 
     public Place restaurantName;
+
+    public HashMap<String, ReviewData> allreviews;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +111,7 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
+        allreviews = new HashMap<>();
     }
 
     private String getLayoutName(int resourceId) {
@@ -369,12 +375,17 @@ public class DefaultActivity extends AppCompatActivity
         return restaurantName;
     }
 
+    public HashMap<String, ReviewData> getAllReviews() {
+        return allreviews;
+    }
+
     @Override
-    public void onSaveReviewClicked(String restaurant_id, String menuitem, int rating, String description) {
+    public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem, int rating, String description) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
 
+        allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description));
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
