@@ -87,7 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void validate(TextView textView, String text) {
                 if (!isPasswordValid(text)) {
                     passwordEditText.setError(getString(R.string.error_invalid_password));
-                } else if (!TextUtils.isEmpty(text)) {
+                } else if (TextUtils.isEmpty(text)) {
                     passwordEditText.setError(getString(R.string.error_field_required));
                 }
             }
@@ -96,14 +96,18 @@ public class RegisterActivity extends AppCompatActivity {
         accept_terms.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                register_button.setEnabled(true);
+                if (b) {
+                    register_button.setEnabled(true);
+                }
             }
         });
 
         reject_terms.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                register_button.setEnabled(false);
+                if (b) {
+                    register_button.setEnabled(false);
+                }
             }
         });
 
@@ -181,9 +185,6 @@ public class RegisterActivity extends AppCompatActivity {
         String last_name = last_nameEditText.getText().toString();
         String email = emailEditText.getText().toString();
 
-        if (!TextUtils.isEmpty(email)) {
-            emailValid = isEmailValid(email);
-        }
         if (!TextUtils.isEmpty(username)) {
             usernameValid = isUsernameValid(username);
         }
@@ -191,9 +192,14 @@ public class RegisterActivity extends AppCompatActivity {
             passwordValid = isPasswordValid(password);
         }
 
-        if (emailValid && usernameValid && passwordValid) {
+        if (usernameValid && passwordValid) {
             DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
             rootRef.child(username).setValue(password);
+
+            //Go to Default Activity
+            Intent i = new Intent(RegisterActivity.this, DefaultActivity.class);
+            startActivity(i);
+            finish();
         }
     }
 
