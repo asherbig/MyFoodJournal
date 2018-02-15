@@ -134,10 +134,10 @@ public class DefaultActivity extends AppCompatActivity
             Fragment fragment = ProfileFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option == "fragment_edit_profile") {
-            Fragment fragment = EditProfileFragment.newInstance(option);
+            Fragment fragment = EditProfileFragment.newInstance(option, this);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option == "fragment_edit_password") {
-            Fragment fragment = EditPasswordFragment.newInstance(option);
+            Fragment fragment = EditPasswordFragment.newInstance(option, this);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();

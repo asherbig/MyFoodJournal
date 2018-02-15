@@ -4,10 +4,14 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 
 /**
@@ -23,6 +27,7 @@ public class EditPasswordFragment extends Fragment implements View.OnClickListen
 
     //parameters
     private String menuOptionParam;
+    private static Context baseContext;
 
     private OnEditPasswordListener mListener;
     private View view;
@@ -40,11 +45,12 @@ public class EditPasswordFragment extends Fragment implements View.OnClickListen
      * @return A new instance of fragment EditPasswordFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static EditPasswordFragment newInstance(String menuOptionParam) {
+    public static EditPasswordFragment newInstance(String menuOptionParam, Context context) {
         EditPasswordFragment fragment = new EditPasswordFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MENU_OPTION, menuOptionParam);
         fragment.setArguments(args);
+        baseContext = context;
         return fragment;
     }
 
@@ -89,10 +95,37 @@ public class EditPasswordFragment extends Fragment implements View.OnClickListen
     //handles button clicks in the fragment
     @Override
     public void onClick(View v) {
+        //hides the keyboard when a button is pressed
+        InputMethodManager mgr = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        mgr.hideSoftInputFromWindow(view.getWindowToken(), 0);
         switch (v.getId()) {
             //Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
             case (R.id.save_button):
+                EditText oldPassField = (EditText) view.findViewById(R.id.old_pass);
+                String oldPass = oldPassField.getText().toString();
+
+                EditText newPassField1 = (EditText) view.findViewById(R.id.new_pass_1);
+                String newPass = newPassField1.getText().toString();
+
+                EditText newPassField2 = (EditText) view.findViewById(R.id.new_pass_2);
+                String newPass2 = newPassField2.getText().toString();
+
+                //TODO Add database communication
+                Log.d("EDIT PASS", "newPass: " + newPass);
+                Log.d("EDIT PASS", "newPass2: " + newPass2);
+                Log.d("EDIT PASS", "equals?: " + newPass.equals(newPass2));
+                if (!newPass.equals(newPass2)) {
+                    CharSequence text = "The new passwords don't match! " +
+                            "Please make your new passwords match.";
+                    int duration = Toast.LENGTH_LONG;
+
+                    Toast toast = Toast.makeText(baseContext, text, duration);
+                    toast.show();
+                    break;
+                }
+
+                //if (oldPass == user.oldPass)
                 if (mListener != null) {
                     mListener.onPassSaveClicked();
                 }

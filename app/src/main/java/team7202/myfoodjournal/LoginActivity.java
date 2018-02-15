@@ -325,7 +325,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 System.out.println("got interrupted!");
             }
 
-            Log.d("LOGIN", "Execution reached this point (1)");
             //TODO this is bad code
             if (loginSuccess.toString().equals("true") ) {
                 return true;
