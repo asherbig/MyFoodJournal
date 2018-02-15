@@ -76,19 +76,18 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         List<Map<String, String>> data = new ArrayList<Map<String, String>>();
         for (String key: allreviews.keySet()) {
             ReviewData reviewdatum = allreviews.get(key);
-            Map<String, String> datum = new HashMap<String, String>(2);
+            Map<String, String> datum = new HashMap<String, String>(4);
             datum.put("Restaurant Name", reviewdatum.restaurant_name);
             datum.put("Menu Item", reviewdatum.menuitem);
-            System.out.println(reviewdatum.restaurant_name);
-            System.out.println(reviewdatum.menuitem);
-
+            datum.put("Description", reviewdatum.description);
+            datum.put("Rating", reviewdatum.rating + "/5");
             data.add(datum);
         }
         SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
-                android.R.layout.simple_list_item_2,
-                new String[] {"Restaurant Name", "Menu Item"},
-                new int[] {android.R.id.text1,
-                        android.R.id.text2});
+                R.layout.myreview_row,
+                new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
+                new int[] {R.id.text1,
+                        R.id.text2, R.id.text3, R.id.text4});
         listview.setAdapter(adapter);
         return view;
     }
