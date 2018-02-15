@@ -24,17 +24,25 @@
                 android:id="@+id/add_title_header"/>
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Restaurant"
-                android:textSize="20sp"
-                android:id="@+id/set_restaurant_header"/>
-
-            <EditText
-                android:id="@+id/restaurant_entry"
+                android:id="@+id/restname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Restaurant Name"
+                android:text="Restaurant Name"
+                android:textAlignment="center"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/set_restaurant_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Menu Item"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/menu_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Menu Item Name"
                 android:inputType="text"
                 android:textSize="20sp" />
 

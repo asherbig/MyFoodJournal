@@ -7,6 +7,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.google.android.gms.location.places.Place;
 
 
 /**
@@ -26,6 +30,13 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
 
     private OnAddReviewListener mListener;
     private View view;
+
+    private Place restaurantName;
+
+    private EditText menuitem;
+    private EditText rating;
+    private EditText description;
+
 
     public AddReviewFragment() {
         // Required empty public constructor
@@ -63,6 +74,15 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
         saveButton.setOnClickListener(this);
         Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(this);
+        DefaultActivity activity = (DefaultActivity) getActivity();
+        restaurantName = activity.getRestaurantName();
+        TextView restaurantNameText = (TextView) view.findViewById(R.id.restname);
+        restaurantNameText.setText(restaurantName.getName());
+
+        menuitem = (EditText) view.findViewById(R.id.menu_item);
+        rating = (EditText) view.findViewById(R.id.rating_entry);
+        description = (EditText) view.findViewById(R.id.description_entry);
+
         return view;
     }
 
@@ -91,7 +111,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
             // which should swap the fragment to go to the right fragment
             case (R.id.save_button):
                 if (mListener != null) {
-                    mListener.onSaveReviewClicked();
+                    mListener.onSaveReviewClicked(restaurantName.getId(), menuitem.getText().toString(), Integer.valueOf(rating.getText().toString()), description.getText().toString());
                 }
                 break;
             case (R.id.cancel_button):
@@ -114,7 +134,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      */
     public interface OnAddReviewListener {
         // TODO: Update argument type and name
-        void onSaveReviewClicked();
+        void onSaveReviewClicked(String id, String menuitem, int rating, String description);
         void onAddReviewCancelClicked();
     }
 }

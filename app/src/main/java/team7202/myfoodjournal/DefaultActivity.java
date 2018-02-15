@@ -20,6 +20,13 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
         EditProfileFragment.OnEditProfileListener,
@@ -31,6 +38,9 @@ public class DefaultActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
+
+    public Place restaurantName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -292,15 +302,78 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFloatingButtonClicked() {
-        Log.d("ADD REVIEW", "Add review floating button clicked.");
-        selectNavOption("fragment_add_review");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Add Review");
+        System.out.println("1");
+        int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
+                .build();
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+            System.out.println("2");
+        } catch (GooglePlayServicesRepairableException e) {
+            final View view = findViewById(R.id.fab);
+            Snackbar.make(view, "Update your Google Play Services!", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+
+        } catch (GooglePlayServicesNotAvailableException e) {
+            final View view = findViewById(R.id.fab);
+            Snackbar.make(view, "Google Play Services are currently unavailable.", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+
+        }
+//
+//        final View view = findViewById(R.id.fab);
+//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                .setAction("Action", null).show();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+                boolean isRestaurant = false;
+                for (int i : place.getPlaceTypes()) {
+                    if (i == Place.TYPE_RESTAURANT) {
+                        isRestaurant = true;
+                        break;
+                    }
+                }
+                if (isRestaurant) {
+                    restaurantName = place;
+                    Log.d("ADD REVIEW", "Add review floating button clicked.");
+                    selectNavOption("fragment_add_review");
+                    ActionBar ab = getSupportActionBar();
+                    ab.setTitle("Add Review");
+
+                } else {
+                    final View view = findViewById(R.id.fab);
+                    Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                System.out.println(status);
+                System.out.println("Hi");
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+                System.out.println("Bye");
+            }
+        }
+    }
+
+    public Place getRestaurantName() {
+        return restaurantName;
     }
 
     @Override
-    public void onSaveReviewClicked() {
+    public void onSaveReviewClicked(String restaurant_id, String menuitem, int rating, String description) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
+
+        //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
         ab.setTitle("My Reviews");
