@@ -372,6 +372,8 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onSaveReviewClicked(String restaurant_id, String menuitem, int rating, String description) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
+        View headerView = mNavigationView.getHeaderView(0);
+        String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
 
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
