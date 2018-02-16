@@ -8,6 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by zguthrie3 on 2/13/2018.
@@ -22,6 +29,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
 
     private MyReviewsFragment.OnMyReviewsInteractionListener mListener;
     private View view;
+
 
     public MyReviewsFragment() {
         // Required empty public constructor
@@ -62,6 +70,25 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         sortByButton.setText("Sort By: \nMost Recent");
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(this);
+        ListView listview = (ListView) view.findViewById(R.id.listviewID);
+        DefaultActivity activity = (DefaultActivity) getActivity();
+        HashMap<String, ReviewData> allreviews = activity.getAllReviews();
+        List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+        for (String key: allreviews.keySet()) {
+            ReviewData reviewdatum = allreviews.get(key);
+            Map<String, String> datum = new HashMap<String, String>(4);
+            datum.put("Restaurant Name", reviewdatum.restaurant_name);
+            datum.put("Menu Item", reviewdatum.menuitem);
+            datum.put("Description", reviewdatum.description);
+            datum.put("Rating", reviewdatum.rating + "/5");
+            data.add(datum);
+        }
+        SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
+                R.layout.myreview_row,
+                new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
+                new int[] {R.id.text1,
+                        R.id.text2, R.id.text3, R.id.text4});
+        listview.setAdapter(adapter);
         return view;
     }
 
