@@ -23,6 +23,8 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+  
+    <!-- Strings for Registration Activity -->
     <string name="register_title">Registration</string>
     <string name="first_name">First Name</string>
     <string name="first_name_hint">Please put first name</string>
