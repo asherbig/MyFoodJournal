@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -16,13 +17,10 @@ import java.util.ArrayList;
 
 import static team7202.myfoodjournal.PageFragment.ARG_MENU_OPTION;
 
-/**
- * Created by Zach on 2/12/2018.
- */
-
 public class FilterMenuDialogFragment extends DialogFragment implements View.OnClickListener {
     private SearchView mRestaurantSearch;
     private ImageButton mCloseMenu;
+    private Button mAddFilter;
     private OnFilterInteractionListener mListener;
     private String menuOptionParam;
     private View view;
@@ -55,6 +53,8 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
         mRestaurantSearch.setOnClickListener(this);
         mCloseMenu = (ImageButton) view.findViewById(R.id.closeFilterMenu);
         mCloseMenu.setOnClickListener(this);
+        mAddFilter = (Button) view.findViewById(R.id.add_filter_button);
+        mAddFilter.setOnClickListener(this);
 
         //generate list
         this.filterList = new ArrayList<String>();
