@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
  */
 public class PageFragment extends Fragment {
     public static final String ARG_MENU_OPTION = "menu_option";
+    public static final String ARG_FILTERS = "filters";
 
     public PageFragment() {
         // Empty constructor required for fragment subclasses

@@ -45,6 +45,7 @@ public class DefaultActivity extends AppCompatActivity
     public Place restaurantName;
 
     public HashMap<String, ReviewData> allreviews;
+    private ArrayList<String> myReviewFilters = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -266,8 +267,9 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFilterButtonClicked() {
+        //make sure that this correctly launches filter for myReviews, otherReviews and wishlist
         Log.d("WISHLIST", "Filters button clicked on Wishlist page");
-        FilterMenuDialogFragment filterMenu = new FilterMenuDialogFragment();
+        FilterMenuDialogFragment filterMenu = FilterMenuDialogFragment.newInstance(myReviewFilters);
         FragmentManager fm = getFragmentManager();
         filterMenu.show(fm, "Filter Menu generated");
     }
@@ -275,6 +277,8 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onApplyFiltersClicked(ArrayList<String> filtersList) {
         //make the filters apply
+        myReviewFilters = filtersList;
+        Log.d("FILTERS", "Filters received from filters menu: " + filtersList.toString());
     }
 
     @Override

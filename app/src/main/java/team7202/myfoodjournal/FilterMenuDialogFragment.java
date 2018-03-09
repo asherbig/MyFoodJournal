@@ -15,26 +15,26 @@ import android.widget.SearchView;
 
 import java.util.ArrayList;
 
-import static team7202.myfoodjournal.PageFragment.ARG_MENU_OPTION;
+import static team7202.myfoodjournal.PageFragment.ARG_FILTERS;
 
 public class FilterMenuDialogFragment extends DialogFragment implements View.OnClickListener {
     private SearchView mRestaurantSearch;
     private ImageButton mCloseMenu;
     private Button mAddFilter;
     private OnFilterInteractionListener mListener;
-    private String menuOptionParam;
     private View view;
     private ArrayList<String> filterList;
     private SearchView filterSearch;
+    private FilterListAdapter adapter;
 
     public FilterMenuDialogFragment() {
 
     }
 
-    public static FilterMenuDialogFragment newInstance(String menuOptionParam) {
+    public static FilterMenuDialogFragment newInstance(ArrayList<String> filtersParam) {
         FilterMenuDialogFragment fragment = new FilterMenuDialogFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_MENU_OPTION, menuOptionParam);
+        args.putStringArrayList(ARG_FILTERS, filtersParam);
         fragment.setArguments(args);
         return fragment;
     }
@@ -43,7 +43,7 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
+            filterList = getArguments().getStringArrayList(ARG_FILTERS);
         }
     }
     @Override
@@ -56,13 +56,16 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
         mAddFilter = (Button) view.findViewById(R.id.add_filter_button);
         mAddFilter.setOnClickListener(this);
 
-        //generate list
-        this.filterList = new ArrayList<String>();
-        filterList.add("test filter 1");
-        filterList.add("test filter 2");
+        //generate list if one wasn't passed in
+        if (this.filterList == null) {
+            this.filterList = new ArrayList<String>();
+            filterList.add("test filter 1");
+            filterList.add("test filter 2");
+        }
 
         //instantiate custom filter list adapter
         FilterListAdapter adapter = new FilterListAdapter(filterList, getContext());
+        this.adapter = adapter;
 
         //handle list-view and assign adapter
         ListView lView = (ListView) view.findViewById(R.id.filter_list);
@@ -94,23 +97,21 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
     @Override
     public void onClick(View v) {
 
-        Log.d("FILTER", "onClick Method Called");
-
         switch (v.getId()) {
             // Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
             case (R.id.restaurant_filter):
                 filterSearch.onActionViewExpanded();
                 break;
+
             case (R.id.add_filter_button):
                 //adding a filter to the list
                 //get the filter to add, then add it
                 String filterString = filterSearch.getQuery().toString();
-
-                Log.d("FILTER", "filter text:" + filterString);
-
-                //filterList.add()
+                filterList.add(0, filterString);
+                adapter.notifyDataSetChanged();
                 break;
+
             case (R.id.closeFilterMenu):
                 if (mListener != null) {
                     mListener.onApplyFiltersClicked(filterList);
