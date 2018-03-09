@@ -3,11 +3,16 @@ package team7202.myfoodjournal;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SearchView;
+
+import java.util.ArrayList;
 
 import static team7202.myfoodjournal.PageFragment.ARG_MENU_OPTION;
 
@@ -21,6 +26,8 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
     private OnFilterInteractionListener mListener;
     private String menuOptionParam;
     private View view;
+    private ArrayList<String> filterList;
+    private SearchView filterSearch;
 
     public FilterMenuDialogFragment() {
 
@@ -48,6 +55,21 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
         mRestaurantSearch.setOnClickListener(this);
         mCloseMenu = (ImageButton) view.findViewById(R.id.closeFilterMenu);
         mCloseMenu.setOnClickListener(this);
+
+        //generate list
+        this.filterList = new ArrayList<String>();
+        filterList.add("test filter 1");
+        filterList.add("test filter 2");
+
+        //instantiate custom filter list adapter
+        FilterListAdapter adapter = new FilterListAdapter(filterList, getContext());
+
+        //handle list-view and assign adapter
+        ListView lView = (ListView) view.findViewById(R.id.filter_list);
+        lView.setAdapter(adapter);
+
+        this.filterSearch = (SearchView) view.findViewById(R.id.restaurant_filter);
+
         return view;
     }
 
@@ -71,15 +93,28 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
     //handles button clicks in the fragment
     @Override
     public void onClick(View v) {
+
+        Log.d("FILTER", "onClick Method Called");
+
         switch (v.getId()) {
             // Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
             case (R.id.restaurant_filter):
-                if (mListener != null) {
-                    mListener.onRestaurantFieldClicked();
-                }
+                filterSearch.onActionViewExpanded();
+                break;
+            case (R.id.add_filter_button):
+                //adding a filter to the list
+                //get the filter to add, then add it
+                String filterString = filterSearch.getQuery().toString();
+
+                Log.d("FILTER", "filter text:" + filterString);
+
+                //filterList.add()
                 break;
             case (R.id.closeFilterMenu):
+                if (mListener != null) {
+                    mListener.onApplyFiltersClicked(filterList);
+                }
                 dismiss();
         }
     }
@@ -96,6 +131,6 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
      */
     public interface OnFilterInteractionListener {
         // TODO: Update argument type and name
-        void onRestaurantFieldClicked();
+        void onApplyFiltersClicked(ArrayList<String> filters);
     }
 }

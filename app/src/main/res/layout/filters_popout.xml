@@ -43,24 +43,41 @@
             android:layout_marginTop="6dp"
             android:background="@color/colorAccent" />
 
-        <TextView
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/add_filter_button"
+            style="?android:textAppearanceSmall"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="Food"
-            android:textSize="24sp" />
+            android:layout_marginBottom="10dp"
+            android:text="Add Filter"
+            android:layout_gravity="center"
+            android:textStyle="bold" />
 
-        <SearchView
-            android:id="@+id/food_filter"
+        <ListView
+            android:id="@+id/filter_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/textView"
-            android:layout_marginBottom="6dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="6dp"
-            android:background="@color/colorAccent" />
+            android:layout_marginBottom="10dp"/>
+
+        <!--<TextView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:text="Food"-->
+            <!--android:textSize="24sp" />-->
+
+        <!--<SearchView-->
+            <!--android:id="@+id/food_filter"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentStart="true"-->
+            <!--android:layout_below="@+id/textView"-->
+            <!--android:layout_marginBottom="6dp"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginRight="10dp"-->
+            <!--android:layout_marginTop="6dp"-->
+            <!--android:background="@color/colorAccent" />-->
     </LinearLayout>
 
     <ImageButton

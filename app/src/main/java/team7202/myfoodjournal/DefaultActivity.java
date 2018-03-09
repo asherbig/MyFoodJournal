@@ -273,8 +273,8 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRestaurantFieldClicked() {
-
+    public void onApplyFiltersClicked(ArrayList<String> filtersList) {
+        //make the filters apply
     }
 
     @Override
