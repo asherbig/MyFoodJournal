@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 
 /**
@@ -20,9 +22,11 @@ import android.widget.Button;
  */
 public class EditProfileFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_MENU_OPTION = "menu_option";
+    private static final String BASE_CONTEXT = "base_context";
 
     //parameters
     private String menuOptionParam;
+    private static Context baseContext;
 
     private OnEditProfileListener mListener;
     private View view;
@@ -38,11 +42,12 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
      * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment EditProfileFragment.
      */
-    public static EditProfileFragment newInstance(String menuOptionParam) {
+    public static EditProfileFragment newInstance(String menuOptionParam, Context context) {
         EditProfileFragment fragment = new EditProfileFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MENU_OPTION, menuOptionParam);
         fragment.setArguments(args);
+        baseContext = context;
         return fragment;
     }
 
@@ -91,6 +96,7 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
             //Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
             case (R.id.save_button):
+
                 if (mListener != null) {
                     mListener.onProfileSaveClicked();
                 }

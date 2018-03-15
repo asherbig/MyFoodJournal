@@ -175,6 +175,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void attemptRegister() {
+
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);

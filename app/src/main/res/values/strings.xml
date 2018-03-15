@@ -18,11 +18,27 @@
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_incorrect_username">This username is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+  
+    <!-- Strings for Registration Activity -->
+    <string name="register_title">Registration</string>
+    <string name="first_name">First Name</string>
+    <string name="first_name_hint">Please put first name</string>
+    <string name="last_name">Last Name</string>
+    <string name="last_name_hint">Please put last name</string>
+    <string name="terms_and_services">Terms and Services</string>
+    <string name="password_hint">(One Uppercase, One Number, and One Special Character; Length must also be greater than 6 characters)</string>
+    <string name="password_label">Password</string>
+    <string name="username_hint">Screen Name</string>
+    <string name="username_label">Username</string>
+    <string name="accept_terms">Accept Terms</string>
+    <string name="reject_terms">Reject Terms</string>
+    <string name="register_label">Register</string>
+    <string name="or_label">Or</string>
+    <string name="return_label">Return</string>
+    <string name="email_hint">Please enter email address</string>
 </resources>
