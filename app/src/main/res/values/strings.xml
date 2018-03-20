@@ -23,7 +23,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-  
+
     <!-- Strings for Registration Activity -->
     <string name="register_title">Registration</string>
     <string name="first_name">First Name</string>
@@ -41,4 +41,5 @@
     <string name="or_label">Or</string>
     <string name="return_label">Return</string>
     <string name="email_hint">Please enter email address</string>
+    <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
 </resources>
