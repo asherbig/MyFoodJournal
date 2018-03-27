@@ -26,6 +26,9 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +48,8 @@ public class DefaultActivity extends AppCompatActivity
     public Place restaurantName;
 
     public HashMap<String, ReviewData> allreviews;
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +117,8 @@ public class DefaultActivity extends AppCompatActivity
                 }
         );
         allreviews = new HashMap<>();
+
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private String getLayoutName(int resourceId) {
@@ -386,6 +393,10 @@ public class DefaultActivity extends AppCompatActivity
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
 
         allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description));
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("username").setValue(user.getDisplayName());
+        FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("menuitem").setValue(menuitem);
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
