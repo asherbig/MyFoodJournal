@@ -28,6 +28,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class DefaultActivity extends AppCompatActivity
@@ -306,6 +307,7 @@ public class DefaultActivity extends AppCompatActivity
         popup.show();
     }
 
+
     @Override
     public void onFloatingButtonClicked() {
         System.out.println("1");
@@ -385,7 +387,7 @@ public class DefaultActivity extends AppCompatActivity
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
 
-        allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description));
+        allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
