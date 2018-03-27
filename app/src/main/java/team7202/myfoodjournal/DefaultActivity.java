@@ -312,7 +312,6 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFloatingButtonClicked() {
-        System.out.println("1");
         int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
@@ -339,6 +338,8 @@ public class DefaultActivity extends AppCompatActivity
 //        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show();
     }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
@@ -366,11 +367,9 @@ public class DefaultActivity extends AppCompatActivity
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 System.out.println(status);
-                System.out.println("Hi");
 
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
-                System.out.println("Bye");
             }
         }
     }
