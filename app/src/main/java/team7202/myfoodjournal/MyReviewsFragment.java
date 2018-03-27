@@ -4,14 +4,19 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.SimpleAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +34,8 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
 
     private MyReviewsFragment.OnMyReviewsInteractionListener mListener;
     private View view;
-
-
+    private List<Map<String, String>> data;
+    private SimpleAdapter adapter;
     public MyReviewsFragment() {
         // Required empty public constructor
     }
@@ -73,7 +78,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
         DefaultActivity activity = (DefaultActivity) getActivity();
         HashMap<String, ReviewData> allreviews = activity.getAllReviews();
-        List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+        data = new ArrayList<Map<String, String>>();
         for (String key: allreviews.keySet()) {
             ReviewData reviewdatum = allreviews.get(key);
             Map<String, String> datum = new HashMap<String, String>(4);
@@ -81,9 +86,10 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
             datum.put("Menu Item", reviewdatum.menuitem);
             datum.put("Description", reviewdatum.description);
             datum.put("Rating", reviewdatum.rating + "/5");
+            datum.put("Date Submitted", reviewdatum.date_submitted);
             data.add(datum);
         }
-        SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
+         adapter = new SimpleAdapter(getContext(), data,
                 R.layout.myreview_row,
                 new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
                 new int[] {R.id.text1,
@@ -122,7 +128,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 break;
             case (R.id.sortby_button):
                 if (mListener != null) {
-                    mListener.onSortByButtonClicked();
+                    onSortByButtonClicked();
                 }
                 break;
             case (R.id.fab):
@@ -131,6 +137,69 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 }
                 break;
         }
+    }
+
+    private static Comparator<Map<String, String>> rating_comparator = new Comparator<Map<String, String>>(){
+        @Override
+        public int compare(Map<String, String> a, Map<String, String> b){
+            return b.get("Rating").compareTo(a.get("Rating"));
+        }
+    };
+
+    private static Comparator<Map<String, String>> restaurant_comparator = new Comparator<Map<String, String>>(){
+        @Override
+        public int compare(Map<String, String> a, Map<String, String> b){
+            return a.get("Restaurant Name").compareTo(b.get("Restaurant Name"));
+        }
+    };
+
+    private static Comparator<Map<String, String>> food_comparator = new Comparator<Map<String, String>>(){
+        @Override
+        public int compare(Map<String, String> a, Map<String, String> b){
+            return a.get("Menu Item").compareTo(b.get("Menu Item"));
+        }
+    };
+
+    private static Comparator<Map<String, String>> time_comparator = new Comparator<Map<String, String>>(){
+        @Override
+        public int compare(Map<String, String> a, Map<String, String> b){
+            return b.get("Date Submitted").compareTo(a.get("Date Submitted"));
+        }
+    };
+
+
+
+    public void onSortByButtonClicked() {
+        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        final View anchor = view.findViewById(R.id.sortby_button);
+        PopupMenu popup = new PopupMenu(getContext(), anchor);
+        getActivity().getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                
+                switch (menuItem.getItemId()) {
+                    case R.id.sortby_mostrecent:
+                        Collections.sort(data, time_comparator);
+                        break;
+                    case R.id.sortby_rating:
+                        Collections.sort(data, rating_comparator);
+                        break;
+                    case R.id.sortby_restaurant:
+                        Collections.sort(data, restaurant_comparator);
+                        break;
+                    case R.id.sortby_food:
+                        Collections.sort(data, food_comparator);
+                        break;
+                }
+                adapter.notifyDataSetChanged();
+                Button sortByButton = (Button) anchor;
+                sortByButton.setText("Sort By: \n" + menuItem.getTitle());
+                return true;
+            }
+        });
+
+        popup.show();
     }
 
     /**
@@ -146,7 +215,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
     public interface OnMyReviewsInteractionListener {
         // TODO: Update argument type and name
         void onFilterButtonClicked();
-        void onSortByButtonClicked();
         void onFloatingButtonClicked();
     }
 }
