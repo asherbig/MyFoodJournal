@@ -34,7 +34,7 @@ import static team7202.myfoodjournal.PageFragment.ARG_FILTERS;
 public class FilterMenuDialogFragment extends DialogFragment implements View.OnClickListener {
     private SearchView mRestaurantSearch;
     private ImageButton mCloseMenu;
-    private Button mAddFilter;
+    //private Button mAddFilter;
     private OnFilterInteractionListener mListener;
     private View view;
     private ArrayList<String> filterList;
@@ -61,6 +61,7 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
             filterList = getArguments().getStringArrayList(ARG_FILTERS);
         }
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.filters_popout, container);
@@ -68,8 +69,8 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
         mRestaurantSearch.setOnClickListener(this);
         mCloseMenu = (ImageButton) view.findViewById(R.id.closeFilterMenu);
         mCloseMenu.setOnClickListener(this);
-        mAddFilter = (Button) view.findViewById(R.id.add_filter_button);
-        mAddFilter.setOnClickListener(this);
+        //mAddFilter = (Button) view.findViewById(R.id.add_filter_button);
+        //mAddFilter.setOnClickListener(this);
         searchText = (TextView) view.findViewById(R.id.textView3);
 
         //generate list if one wasn't passed in
@@ -140,13 +141,12 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
                 }
                 break;
 
-            case (R.id.add_filter_button):
-                //adding a filter to the list
-                //get the filter to add, then add it
-                String filterString = filterSearch.getQuery().toString();
-                filterList.add(0, filterString);
-                adapter.notifyDataSetChanged();
-                break;
+//            case (R.id.add_filter_button):
+//                //adding a filter to the list
+//                //get the filter to add, then add it
+//                String filterString = filterSearch.getQuery().toString();
+//                addFilter(filterString);
+//                break;
 
             case (R.id.closeFilterMenu):
                 if (mListener != null) {
@@ -154,6 +154,12 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
                 }
                 dismiss();
         }
+    }
+
+    //this adds a string to the filters list
+    private void addFilter(String toBeAdded) {
+        filterList.add(0, toBeAdded);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -170,7 +176,7 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
                 }
                 if (isRestaurant) {
                     //Add "place.getName().toString()" to the search/text view
-                    System.out.println(place.getName().toString());
+                    addFilter(place.getName().toString());
 
                 } else {
                     Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
