@@ -390,7 +390,7 @@ public class DefaultActivity extends AppCompatActivity
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
 
-        allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
+        allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
