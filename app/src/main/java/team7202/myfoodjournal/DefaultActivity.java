@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -28,6 +29,7 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
@@ -395,10 +397,14 @@ public class DefaultActivity extends AppCompatActivity
         allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description));
 
         FirebaseUser user = mAuth.getCurrentUser();
-            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("username").setValue(username);
-            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("menuitem").setValue(menuitem);
-            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("rating").setValue(rating);
-            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("description").setValue(description);
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid());
+
+        String key = myRef.push().getKey();
+        myRef.child(key).setValue(username);
+        myRef.child(key).setValue(restaurant_name);
+        myRef.child(key).setValue(menuitem);
+        myRef.child(key).setValue(rating);
+        myRef.child(key).setValue(description);
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
