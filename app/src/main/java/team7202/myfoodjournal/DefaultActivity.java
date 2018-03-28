@@ -389,6 +389,12 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("SAVE REVIEW", "Saved review written by user.");
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
+        final View view = findViewById(R.id.fab);
+        if (rating < 1 || rating > 5) {
+            Snackbar.make(view, "Rating must be between 1 and 5", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
 
         allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database

@@ -139,7 +139,6 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnAddReviewListener {
-        // TODO: Update argument type and name
         void onSaveReviewClicked(String id, String name, String menuitem, int rating, String description);
         void onAddReviewCancelClicked();
     }
