@@ -89,11 +89,17 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
             datum.put("Date Submitted", reviewdatum.date_submitted);
             data.add(datum);
         }
-         adapter = new SimpleAdapter(getContext(), data,
+//         adapter = new SimpleAdapter(getContext(), data,
+//                R.layout.myreview_row,
+//                new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
+//                new int[] {R.id.text1,
+//                        R.id.text2, R.id.text3, R.id.text4});
+        //this doesn't have the description, looks cleaner with lots of reviews
+        adapter = new SimpleAdapter(getContext(), data,
                 R.layout.myreview_row,
-                new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
+                new String[] {"Restaurant Name", "Menu Item", "Rating"},
                 new int[] {R.id.text1,
-                        R.id.text2, R.id.text3, R.id.text4});
+                        R.id.text2, R.id.text4});
         listview.setAdapter(adapter);
         return view;
     }
