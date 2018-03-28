@@ -395,8 +395,10 @@ public class DefaultActivity extends AppCompatActivity
         allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description));
 
         FirebaseUser user = mAuth.getCurrentUser();
-        FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("username").setValue(user.getDisplayName());
-        FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("menuitem").setValue(menuitem);
+            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("username").setValue(username);
+            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("menuitem").setValue(menuitem);
+            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("rating").setValue(rating);
+            FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid()).child("description").setValue(description);
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
