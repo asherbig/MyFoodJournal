@@ -99,9 +99,11 @@ public class DefaultActivity extends AppCompatActivity
                             Intent i = new Intent(DefaultActivity.this, LoginActivity.class);
                             startActivity(i);
                             finish();
+                        } else if (layout.equals("Restaurants")) {
+                            onFloatingButtonClicked(2);
+                            mDrawerLayout.closeDrawers();
                         } else {
                             selectNavOption(layout);
-                          
                             // Updates selected item and title, then closes the drawer
                             menuItem.setChecked(true);
                             ab.setTitle(menuItem.getTitle());
@@ -119,6 +121,9 @@ public class DefaultActivity extends AppCompatActivity
         switch(resourceId) {
             case R.id.nav_myreviews:
                 layoutName = "fragment_myreviews";
+                break;
+            case R.id.nav_restaurants:
+                layoutName = "Restaurants";
                 break;
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
@@ -307,9 +312,9 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFloatingButtonClicked() {
+    public void onFloatingButtonClicked(int requestCode) {
         System.out.println("1");
-        int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+        int PLACE_AUTOCOMPLETE_REQUEST_CODE = requestCode;
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .build();
@@ -337,7 +342,28 @@ public class DefaultActivity extends AppCompatActivity
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
+        ActionBar ab = getSupportActionBar();
+        if (resultCode == RESULT_OK) {
+            Place place = PlaceAutocomplete.getPlace(this, data);
+            if (place.getPlaceTypes().get(0) == Place.TYPE_RESTAURANT) {
+                restaurantName = place;
+                switch (requestCode) {
+                    case (1):
+                        selectNavOption("fragment_add_review");
+                        ab.setTitle("Add Review");
+                        break;
+                    case (2):
+                        selectNavOption("fragment_wishlist");
+                        ab.setTitle("Successful test");
+                }
+            } else {
+                final View view = findViewById(R.id.fab);
+                Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        }
+
+/*        if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(this, data);
                 boolean isRestaurant = false;
@@ -368,7 +394,7 @@ public class DefaultActivity extends AppCompatActivity
                 // The user canceled the operation.
                 System.out.println("Bye");
             }
-        }
+        }*/
     }
 
     public Place getRestaurantName() {

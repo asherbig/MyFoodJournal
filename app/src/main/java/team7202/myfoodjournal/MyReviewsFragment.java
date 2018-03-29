@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -89,6 +90,13 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 new int[] {R.id.text1,
                         R.id.text2, R.id.text3, R.id.text4});
         listview.setAdapter(adapter);
+        AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                adapterView.getItemAtPosition(position);
+            }
+        };
+        listview.setOnItemClickListener(listListener);
         return view;
     }
 
@@ -127,7 +135,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 break;
             case (R.id.fab):
                 if (mListener != null) {
-                    mListener.onFloatingButtonClicked();
+                    mListener.onFloatingButtonClicked(1);
                 }
                 break;
         }
@@ -147,6 +155,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         // TODO: Update argument type and name
         void onFilterButtonClicked();
         void onSortByButtonClicked();
-        void onFloatingButtonClicked();
+        void onFloatingButtonClicked(int requestCode);
     }
 }
