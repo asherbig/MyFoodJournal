@@ -137,7 +137,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean isUsernameValid(String username_input) {
         Boolean isMatch;
-        String username_regex = "^\\w{5,8}$";
+        String username_regex = "^\\w{5,12}$";
         Pattern pattern = Pattern.compile(username_regex);
         Matcher matcher = pattern.matcher(username_input);
 
@@ -205,8 +205,12 @@ public class RegisterActivity extends AppCompatActivity {
             passwordEditText.setError(getString(R.string.error_field_required));
             focusView = passwordEditText;
             cancel = true;
-        } else if (!isPasswordValid(password)) {
+        } else if (!isPasswordValid(password) && password.length() < 8) {
             passwordEditText.setError(getString(R.string.error_invalid_password));
+            focusView = passwordEditText;
+            cancel = true;
+        } else if (!isPasswordValid(password)) {
+            passwordEditText.setError(getString(R.string.error_incorrect_password));
             focusView = passwordEditText;
             cancel = true;
         }

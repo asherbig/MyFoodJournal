@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class DefaultActivity extends AppCompatActivity
@@ -50,6 +51,7 @@ public class DefaultActivity extends AppCompatActivity
     public Place restaurantName;
 
     public HashMap<String, ReviewData> allreviews;
+    private ArrayList<String> myReviewFilters = new ArrayList<>();
 
     private FirebaseAuth mAuth;
 
@@ -275,15 +277,18 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFilterButtonClicked() {
+        //make sure that this correctly launches filter for myReviews, otherReviews and wishlist
         Log.d("WISHLIST", "Filters button clicked on Wishlist page");
-        FilterMenuDialogFragment filterMenu = new FilterMenuDialogFragment();
+        FilterMenuDialogFragment filterMenu = FilterMenuDialogFragment.newInstance(myReviewFilters);
         FragmentManager fm = getFragmentManager();
         filterMenu.show(fm, "Filter Menu generated");
     }
 
     @Override
-    public void onRestaurantFieldClicked() {
-
+    public void onApplyFiltersClicked(ArrayList<String> filtersList) {
+        //make the filters apply
+        myReviewFilters = filtersList;
+        Log.d("FILTERS", "Filters received from filters menu: " + filtersList.toString());
     }
 
     @Override
@@ -315,9 +320,9 @@ public class DefaultActivity extends AppCompatActivity
         popup.show();
     }
 
+
     @Override
     public void onFloatingButtonClicked() {
-        System.out.println("1");
         int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
@@ -344,6 +349,8 @@ public class DefaultActivity extends AppCompatActivity
 //        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                .setAction("Action", null).show();
     }
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
@@ -371,11 +378,9 @@ public class DefaultActivity extends AppCompatActivity
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 System.out.println(status);
-                System.out.println("Hi");
 
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
-                System.out.println("Bye");
             }
         }
     }
@@ -393,8 +398,14 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("SAVE REVIEW", "Saved review written by user.");
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
+        final View view = findViewById(R.id.fab);
+        if (rating < 1 || rating > 5) {
+            Snackbar.make(view, "Rating must be between 1 and 5", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
 
-        allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description));
+        allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
 
         FirebaseUser user = mAuth.getCurrentUser();
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid());
@@ -405,6 +416,7 @@ public class DefaultActivity extends AppCompatActivity
         myRef.child(key).child("menuitem").setValue(menuitem);
         myRef.child(key).child("rating").setValue(rating);
         myRef.child(key).child("description").setValue(description);
+
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
