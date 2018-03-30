@@ -400,11 +400,11 @@ public class DefaultActivity extends AppCompatActivity
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid());
 
         String key = myRef.push().getKey();
-        myRef.child(key).setValue(username);
-        myRef.child(key).setValue(restaurant_name);
-        myRef.child(key).setValue(menuitem);
-        myRef.child(key).setValue(rating);
-        myRef.child(key).setValue(description);
+        myRef.child(key).child("username").setValue(username);
+        myRef.child(key).child("restaurant_name").setValue(restaurant_name);
+        myRef.child(key).child("menuitem").setValue(menuitem);
+        myRef.child(key).child("rating").setValue(rating);
+        myRef.child(key).child("description").setValue(description);
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
