@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -26,6 +27,10 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,6 +52,8 @@ public class DefaultActivity extends AppCompatActivity
 
     public HashMap<String, ReviewData> allreviews;
     private ArrayList<String> myReviewFilters = new ArrayList<>();
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +121,8 @@ public class DefaultActivity extends AppCompatActivity
                 }
         );
         allreviews = new HashMap<>();
+
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private String getLayoutName(int resourceId) {
@@ -397,6 +406,17 @@ public class DefaultActivity extends AppCompatActivity
         }
 
         allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid());
+
+        String key = myRef.push().getKey();
+        myRef.child(key).child("username").setValue(username);
+        myRef.child(key).child("restaurant_name").setValue(restaurant_name);
+        myRef.child(key).child("menuitem").setValue(menuitem);
+        myRef.child(key).child("rating").setValue(rating);
+        myRef.child(key).child("description").setValue(description);
+
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
