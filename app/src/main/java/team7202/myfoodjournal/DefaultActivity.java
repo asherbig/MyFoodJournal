@@ -37,7 +37,8 @@ public class DefaultActivity extends AppCompatActivity
         WishlistFragment.OnWishlistInteractionListener,
         FilterMenuDialogFragment.OnFilterInteractionListener,
         MyReviewsFragment.OnMyReviewsInteractionListener,
-        AddReviewFragment.OnAddReviewListener {
+        AddReviewFragment.OnAddReviewListener,
+        RestaurantFragment.OnRestaurantInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -100,7 +101,9 @@ public class DefaultActivity extends AppCompatActivity
                             startActivity(i);
                             finish();
                         } else if (layout.equals("Restaurants")) {
-                            onFloatingButtonClicked(2);
+                            menuItem.setChecked(true);
+                            ab.setTitle(menuItem.getTitle());
+                            loadPlaces(2);
                             mDrawerLayout.closeDrawers();
                         } else {
                             selectNavOption(layout);
@@ -158,6 +161,9 @@ public class DefaultActivity extends AppCompatActivity
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_add_review")) {
             Fragment fragment = AddReviewFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else if (option.equals("restaurant_summary_fragment")) {
+            Fragment fragment = RestaurantFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();
@@ -284,7 +290,7 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onSortByButtonClicked() {
-        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        Log.d("SORTBY", "Sort By button clicked");
         final View anchor = findViewById(R.id.sortby_button);
         PopupMenu popup = new PopupMenu(this, anchor);
         getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
@@ -313,8 +319,10 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFloatingButtonClicked(int requestCode) {
-        System.out.println("1");
-        int PLACE_AUTOCOMPLETE_REQUEST_CODE = requestCode;
+        loadPlaces(requestCode);
+    }
+
+    private void loadPlaces(int requestCode) {
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .build();
@@ -322,8 +330,7 @@ public class DefaultActivity extends AppCompatActivity
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                             .build(this);
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-            System.out.println("2");
+            startActivityForResult(intent, requestCode);
         } catch (GooglePlayServicesRepairableException e) {
             final View view = findViewById(R.id.fab);
             Snackbar.make(view, "Update your Google Play Services!", Snackbar.LENGTH_LONG)
@@ -335,10 +342,6 @@ public class DefaultActivity extends AppCompatActivity
                     .setAction("Action", null).show();
 
         }
-//
-//        final View view = findViewById(R.id.fab);
-//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -353,7 +356,7 @@ public class DefaultActivity extends AppCompatActivity
                         ab.setTitle("Add Review");
                         break;
                     case (2):
-                        selectNavOption("fragment_wishlist");
+                        selectNavOption("restaurant_summary_fragment");
                         ab.setTitle("Successful test");
                 }
             } else {
@@ -424,5 +427,12 @@ public class DefaultActivity extends AppCompatActivity
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
         ab.setTitle("My Reviews");
+    }
+
+    @Override
+    public void onSearchBarClicked() {
+        Log.d("SEARCH BAR CLICKED", "Search bar clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Search Bar successfully clicked.");
     }
 }
