@@ -43,7 +43,9 @@ public class DefaultActivity extends AppCompatActivity
         WishlistFragment.OnWishlistInteractionListener,
         FilterMenuDialogFragment.OnFilterInteractionListener,
         MyReviewsFragment.OnMyReviewsInteractionListener,
-        AddReviewFragment.OnAddReviewListener {
+        AddReviewFragment.OnAddReviewListener,
+        RestaurantFragment.OnRestaurantInteractionListener,
+        DetailedReviewFragment.OnReviewInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -108,9 +110,13 @@ public class DefaultActivity extends AppCompatActivity
                             Intent i = new Intent(DefaultActivity.this, LoginActivity.class);
                             startActivity(i);
                             finish();
+                        } else if (layout.equals("Restaurants")) {
+                            menuItem.setChecked(true);
+                            ab.setTitle(menuItem.getTitle());
+                            loadPlaces(2);
+                            mDrawerLayout.closeDrawers();
                         } else {
                             selectNavOption(layout);
-                          
                             // Updates selected item and title, then closes the drawer
                             menuItem.setChecked(true);
                             ab.setTitle(menuItem.getTitle());
@@ -130,6 +136,9 @@ public class DefaultActivity extends AppCompatActivity
         switch(resourceId) {
             case R.id.nav_myreviews:
                 layoutName = "fragment_myreviews";
+                break;
+            case R.id.nav_restaurants:
+                layoutName = "Restaurants";
                 break;
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
@@ -164,6 +173,9 @@ public class DefaultActivity extends AppCompatActivity
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_add_review")) {
             Fragment fragment = AddReviewFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else if (option.equals("restaurant_summary_fragment")) {
+            Fragment fragment = RestaurantFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();
@@ -293,7 +305,7 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onSortByButtonClicked() {
-        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        Log.d("SORTBY", "Sort By button clicked");
         final View anchor = findViewById(R.id.sortby_button);
         PopupMenu popup = new PopupMenu(this, anchor);
         getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
@@ -323,7 +335,10 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFloatingButtonClicked() {
-        int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+        loadPlaces(1);
+    }
+
+    private void loadPlaces(int requestCode) {
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .build();
@@ -331,8 +346,7 @@ public class DefaultActivity extends AppCompatActivity
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                             .build(this);
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-            System.out.println("2");
+            startActivityForResult(intent, requestCode);
         } catch (GooglePlayServicesRepairableException e) {
             final View view = findViewById(R.id.fab);
             Snackbar.make(view, "Update your Google Play Services!", Snackbar.LENGTH_LONG)
@@ -344,43 +358,30 @@ public class DefaultActivity extends AppCompatActivity
                     .setAction("Action", null).show();
 
         }
-//
-//        final View view = findViewById(R.id.fab);
-//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                boolean isRestaurant = false;
-                for (int i : place.getPlaceTypes()) {
-                    if (i == Place.TYPE_RESTAURANT) {
-                        isRestaurant = true;
+        ActionBar ab = getSupportActionBar();
+        if (resultCode == RESULT_OK) {
+            Place place = PlaceAutocomplete.getPlace(this, data);
+            if (place.getPlaceTypes().get(0) == Place.TYPE_RESTAURANT) {
+                restaurantName = place;
+                switch (requestCode) {
+                    case (1):
+                        selectNavOption("fragment_add_review");
+                        ab.setTitle("Add Review");
                         break;
-                    }
+                    case (2):
+                        selectNavOption("restaurant_summary_fragment");
+                        ab.setTitle(restaurantName.getName());
+                        break;
                 }
-                if (isRestaurant) {
-                    restaurantName = place;
-                    Log.d("ADD REVIEW", "Add review floating button clicked.");
-                    selectNavOption("fragment_add_review");
-                    ActionBar ab = getSupportActionBar();
-                    ab.setTitle("Add Review");
-
-                } else {
-                    final View view = findViewById(R.id.fab);
-                    Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                System.out.println(status);
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
+            } else {
+                final View view = findViewById(R.id.fab);
+                Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         }
     }
@@ -429,5 +430,26 @@ public class DefaultActivity extends AppCompatActivity
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
         ab.setTitle("My Reviews");
+    }
+
+    @Override
+    public void onSearchBarClicked() {
+        Log.d("SEARCH BAR CLICKED", "Search bar clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Search Bar successfully clicked.");
+    }
+
+    @Override
+    public void onCancelButtonClicked() {
+        Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        selectNavOption("restaurant_summary_fragment");
+    }
+
+    @Override
+    public void onAddWishlistButtonClicked() {
+        Log.d("WISHLIST BUTTON CLICKED", "Wishlist button clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Wishlist Button clicked");
     }
 }

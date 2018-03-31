@@ -40,13 +40,11 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/text4"
-        android:layout_width="120dp"
+    <Button
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="right"
         android:layout_weight="1"
-        android:lines="1"
-        android:text="TextView"
-        android:textSize="18sp" />
+        android:text="Add to Wishlist" />
 
 </LinearLayout>
