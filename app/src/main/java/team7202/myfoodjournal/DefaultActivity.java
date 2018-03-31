@@ -318,8 +318,8 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFloatingButtonClicked(int requestCode) {
-        loadPlaces(requestCode);
+    public void onFloatingButtonClicked() {
+        loadPlaces(1);
     }
 
     private void loadPlaces(int requestCode) {

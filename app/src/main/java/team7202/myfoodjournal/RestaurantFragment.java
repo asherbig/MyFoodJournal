@@ -1,6 +1,7 @@
 package team7202.myfoodjournal;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,23 +64,22 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         view = inflater.inflate(R.layout.restaurant_summary_fragment, container, false);
         TextView title = (TextView) view.findViewById(R.id.name_header);
         DefaultActivity activity = (DefaultActivity) getActivity();
+        title.setText(activity.getRestaurantName().getName());
         HashMap<String, ReviewData> allreviews = activity.getAllReviews();
         List<Map<String, String>> data = new ArrayList<Map<String, String>>();
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
         for (String key: allreviews.keySet()) {
             ReviewData reviewdatum = allreviews.get(key);
-            Map<String, String> datum = new HashMap<String, String>(4);
-            datum.put("Restaurant Name", reviewdatum.restaurant_name);
+            Map<String, String> datum = new HashMap<String, String>(3);
             datum.put("Menu Item", reviewdatum.menuitem);
             datum.put("Description", reviewdatum.description);
             datum.put("Rating", reviewdatum.rating + "/5");
             data.add(datum);
         }
         SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
-                R.layout.myreview_row,
-                new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
-                new int[] {R.id.text1,
-                        R.id.text2, R.id.text3, R.id.text4});
+                R.layout.restaurant_item_row,
+                new String[] {"Menu Item", "Description", "Rating"},
+                new int[] {R.id.text1, R.id.text2, R.id.text3});
         listview.setAdapter(adapter);
         AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
             @Override
@@ -93,6 +93,23 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         sortByButton.setOnClickListener(this);
         sortByButton.setText("Sort By: \nMost Recent");
         return view;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof RestaurantFragment.OnRestaurantInteractionListener) {
+            mListener = (RestaurantFragment.OnRestaurantInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnRestaurantInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     //handles button clicks in the fragment

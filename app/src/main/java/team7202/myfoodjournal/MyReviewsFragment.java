@@ -135,7 +135,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 break;
             case (R.id.fab):
                 if (mListener != null) {
-                    mListener.onFloatingButtonClicked(1);
+                    mListener.onFloatingButtonClicked();
                 }
                 break;
         }
@@ -155,6 +155,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         // TODO: Update argument type and name
         void onFilterButtonClicked();
         void onSortByButtonClicked();
-        void onFloatingButtonClicked(int requestCode);
+        void onFloatingButtonClicked();
     }
 }
