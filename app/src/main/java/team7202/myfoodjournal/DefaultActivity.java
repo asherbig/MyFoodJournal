@@ -38,7 +38,8 @@ public class DefaultActivity extends AppCompatActivity
         FilterMenuDialogFragment.OnFilterInteractionListener,
         MyReviewsFragment.OnMyReviewsInteractionListener,
         AddReviewFragment.OnAddReviewListener,
-        RestaurantFragment.OnRestaurantInteractionListener {
+        RestaurantFragment.OnRestaurantInteractionListener,
+        DetailedReviewFragment.OnReviewInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -357,7 +358,8 @@ public class DefaultActivity extends AppCompatActivity
                         break;
                     case (2):
                         selectNavOption("restaurant_summary_fragment");
-                        ab.setTitle("Successful test");
+                        ab.setTitle(restaurantName.getName());
+                        break;
                 }
             } else {
                 final View view = findViewById(R.id.fab);
@@ -365,39 +367,6 @@ public class DefaultActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         }
-
-/*        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                boolean isRestaurant = false;
-                for (int i : place.getPlaceTypes()) {
-                    if (i == Place.TYPE_RESTAURANT) {
-                        isRestaurant = true;
-                        break;
-                    }
-                }
-                if (isRestaurant) {
-                    restaurantName = place;
-                    Log.d("ADD REVIEW", "Add review floating button clicked.");
-                    selectNavOption("fragment_add_review");
-                    ActionBar ab = getSupportActionBar();
-                    ab.setTitle("Add Review");
-
-                } else {
-                    final View view = findViewById(R.id.fab);
-                    Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                System.out.println(status);
-                System.out.println("Hi");
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-                System.out.println("Bye");
-            }
-        }*/
     }
 
     public Place getRestaurantName() {
@@ -434,5 +403,19 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("SEARCH BAR CLICKED", "Search bar clicked by user.");
         ActionBar ab = getSupportActionBar();
         ab.setTitle("Search Bar successfully clicked.");
+    }
+
+    @Override
+    public void onCancelButtonClicked() {
+        Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        selectNavOption("restaurant_summary_fragment");
+    }
+
+    @Override
+    public void onAddWishlistButtonClicked() {
+        Log.d("WISHLIST BUTTON CLICKED", "Wishlist button clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Wishlist Button clicked");
     }
 }

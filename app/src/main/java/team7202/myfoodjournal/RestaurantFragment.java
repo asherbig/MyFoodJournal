@@ -1,13 +1,16 @@
 package team7202.myfoodjournal;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -61,31 +64,39 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        String[] keyStrings = {"Menu Item", "Description", "Rating"};
         view = inflater.inflate(R.layout.restaurant_summary_fragment, container, false);
         TextView title = (TextView) view.findViewById(R.id.name_header);
-        DefaultActivity activity = (DefaultActivity) getActivity();
-        title.setText(activity.getRestaurantName().getName());
+
+        final DefaultActivity activity = (DefaultActivity) getActivity();
+        final CharSequence name = activity.getRestaurantName().getName();
+        title.setText(name);
         HashMap<String, ReviewData> allreviews = activity.getAllReviews();
         List<Map<String, String>> data = new ArrayList<Map<String, String>>();
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
         for (String key: allreviews.keySet()) {
             ReviewData reviewdatum = allreviews.get(key);
             Map<String, String> datum = new HashMap<String, String>(3);
-            datum.put("Menu Item", reviewdatum.menuitem);
-            datum.put("Description", reviewdatum.description);
-            datum.put("Rating", reviewdatum.rating + "/5");
+            datum.put(keyStrings[0], reviewdatum.menuitem);
+            datum.put(keyStrings[1], reviewdatum.description);
+            datum.put(keyStrings[2], reviewdatum.rating + "/5");
             data.add(datum);
         }
         SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
-                R.layout.restaurant_item_row,
-                new String[] {"Menu Item", "Description", "Rating"},
+                R.layout.myreview_row, keyStrings,
                 new int[] {R.id.text1, R.id.text2, R.id.text3});
         listview.setAdapter(adapter);
+
         AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                adapterView.getItemAtPosition(position);
-
+                TextView menuItem = (TextView) view.findViewById(R.id.text1);
+                TextView description = (TextView) view.findViewById(R.id.text2);
+                TextView rating = (TextView) view.findViewById(R.id.text3);
+                CharSequence[] information = {name, menuItem.getText(), rating.getText(),
+                        description.getText()};
+                Fragment fragment = DetailedReviewFragment.newInstance(information);
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
             }
         };
         listview.setOnItemClickListener(listListener);
