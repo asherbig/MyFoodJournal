@@ -1,14 +1,18 @@
 package team7202.myfoodjournal;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,6 +42,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
     private View view;
     private List<Map<String, String>> data;
     private SimpleAdapter adapter;
+    private WishlistAdapter wishlistAdapter;
 
     public WishlistFragment() {
         // Required empty public constructor
@@ -78,11 +83,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
 
-        adapter = new SimpleAdapter(getContext(), data,
-                R.layout.wishlist_row,
-                new String[] {"Restaurant Name", "Address", "Menu Item"},
-                new int[] {R.id.text1, R.id.text2, R.id.text3});
-
+        wishlistAdapter = new WishlistAdapter(getContext(), data);
         wishlistRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -96,7 +97,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
                     data.add(datum);
                 }
-                adapter.notifyDataSetChanged();
+                wishlistAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -105,7 +106,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-        listview.setAdapter(adapter);
+        listview.setAdapter(wishlistAdapter);
         Button filtersButton = (Button) view.findViewById(R.id.filters_button);
         filtersButton.setOnClickListener(this);
         Button sortByButton = (Button) view.findViewById(R.id.sortby_button);
@@ -164,5 +165,41 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
         // TODO: Update argument type and name
         void onFilterButtonClicked();
         void onSortByButtonClicked();
+    }
+
+    public class WishlistAdapter extends ArrayAdapter<Map<String, String>> {
+        public WishlistAdapter(Context context, List wishlistData) {
+            super(context, 0, wishlistData);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // Get the data item for this position
+            Map<String, String> entry = getItem(position);
+            // Check if an existing view is being reused, otherwise inflate the view
+            if (convertView == null) {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.wishlist_row, parent, false);
+            }
+            // Lookup view for data population
+            TextView resName = (TextView) convertView.findViewById(R.id.text1);
+            TextView address = (TextView) convertView.findViewById(R.id.text2);
+            TextView menuItem = (TextView) convertView.findViewById(R.id.text3);
+
+            // Populate the data into the template view using the data object
+            resName.setText(entry.get("Restaurant Name"));
+            address.setText(entry.get("Address"));
+            menuItem.setText(entry.get("Menu Item"));
+
+            Button add_review_button = (Button) convertView.findViewById(R.id.add_review_button);
+            add_review_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("TEST", "Successfully registered onClick in ListView entry.");
+                }
+            });
+
+            // Return the completed view to render on screen
+            return convertView;
+        }
     }
 }
