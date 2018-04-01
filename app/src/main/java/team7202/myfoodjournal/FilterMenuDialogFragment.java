@@ -34,7 +34,7 @@ import static team7202.myfoodjournal.PageFragment.ARG_FILTERS;
 public class FilterMenuDialogFragment extends DialogFragment implements View.OnClickListener {
     private SearchView mRestaurantSearch;
     private ImageButton mCloseMenu;
-    //private Button mAddFilter;
+    private Button mApplyFilter;
     private OnFilterInteractionListener mListener;
     private View view;
     private ArrayList<String> filterList;
@@ -69,8 +69,8 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
         mRestaurantSearch.setOnClickListener(this);
         mCloseMenu = (ImageButton) view.findViewById(R.id.closeFilterMenu);
         mCloseMenu.setOnClickListener(this);
-        //mAddFilter = (Button) view.findViewById(R.id.add_filter_button);
-        //mAddFilter.setOnClickListener(this);
+        mApplyFilter = (Button) view.findViewById(R.id.apply_filter_button);
+        mApplyFilter.setOnClickListener(this);
         searchText = (TextView) view.findViewById(R.id.textView3);
 
         //generate list if one wasn't passed in
@@ -141,12 +141,12 @@ public class FilterMenuDialogFragment extends DialogFragment implements View.OnC
                 }
                 break;
 
-//            case (R.id.add_filter_button):
-//                //adding a filter to the list
-//                //get the filter to add, then add it
-//                String filterString = filterSearch.getQuery().toString();
-//                addFilter(filterString);
-//                break;
+            case (R.id.apply_filter_button):
+                if (mListener != null) {
+                    mListener.onApplyFiltersClicked(filterList);
+                }
+                dismiss();
+                break;
 
             case (R.id.closeFilterMenu):
                 if (mListener != null) {
