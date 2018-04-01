@@ -51,16 +51,6 @@
                 android:text="TextView" />
         </SearchView>
 
-        <!--<Button-->
-            <!--android:id="@+id/add_filter_button"-->
-            <!--style="?android:textAppearanceSmall"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginBottom="10dp"-->
-            <!--android:text="Add Filter"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:textStyle="bold" />-->
-
         <ListView
             android:id="@+id/filter_list"
             android:layout_width="match_parent"
@@ -69,6 +59,16 @@
             android:layout_marginBottom="10dp"
             android:divider="@color/colorPrimaryDark"
             android:dividerHeight="1dp"/>
+
+        <Button
+            android:id="@+id/apply_filter_button"
+            style="?android:textAppearanceSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="Apply and Exit"
+            android:layout_gravity="center"
+            android:textStyle="bold" />
 
         <!--<TextView-->
             <!--android:layout_width="match_parent"-->
