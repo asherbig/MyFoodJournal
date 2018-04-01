@@ -45,6 +45,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="10dp"
                     android:text="Menu Item Name HERE"
+                    android:textAlignment="center"
                     android:textSize="24sp" />
 
                 <LinearLayout
@@ -64,7 +65,7 @@
                         android:textSize="24sp"
                         android:textStyle="italic" />
 
-                    <EditText
+                    <TextView
                         android:id="@+id/rating_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -91,7 +92,7 @@
                         android:textSize="24sp"
                         android:textStyle="italic" />
 
-                    <EditText
+                    <TextView
                         android:id="@+id/description_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

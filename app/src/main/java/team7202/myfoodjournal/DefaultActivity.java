@@ -9,6 +9,7 @@ import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -29,12 +30,17 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
@@ -112,7 +118,6 @@ public class DefaultActivity extends AppCompatActivity
                             finish();
                         } else if (layout.equals("Restaurants")) {
                             menuItem.setChecked(true);
-                            ab.setTitle(menuItem.getTitle());
                             loadPlaces(2);
                             mDrawerLayout.closeDrawers();
                         } else {
@@ -201,13 +206,6 @@ public class DefaultActivity extends AppCompatActivity
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_default, menu);
-//        return true;
-//    }
-//
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         /* Pass the event to ActionBarDrawerToggle, if it returns true, then it has
@@ -366,7 +364,17 @@ public class DefaultActivity extends AppCompatActivity
         ActionBar ab = getSupportActionBar();
         if (resultCode == RESULT_OK) {
             Place place = PlaceAutocomplete.getPlace(this, data);
-            if (place.getPlaceTypes().get(0) == Place.TYPE_RESTAURANT) {
+
+            boolean isTaggedRestaurant = false;
+            List<Integer> placeTypes = place.getPlaceTypes();
+            for (int i = 0; i < placeTypes.size(); i++) {
+                if (placeTypes.get(i) == Place.TYPE_RESTAURANT) {
+                    isTaggedRestaurant = true;
+                    break;
+                }
+            }
+
+            if (isTaggedRestaurant) {
                 restaurantName = place;
                 switch (requestCode) {
                     case (1):
@@ -375,7 +383,7 @@ public class DefaultActivity extends AppCompatActivity
                         break;
                     case (2):
                         selectNavOption("restaurant_summary_fragment");
-                        ab.setTitle(restaurantName.getName());
+                        ab.setTitle("Restaurant Reviews");
                         break;
                 }
             } else {
@@ -406,10 +414,13 @@ public class DefaultActivity extends AppCompatActivity
             return;
         }
 
-        allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
+        String currentTime = "" + (System.currentTimeMillis() / 1000);
+        allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, currentTime));
 
         FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("reviews").child(user.getUid());
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
+
+        DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurant_id);
 
         String key = myRef.push().getKey();
         myRef.child(key).child("username").setValue(username);
@@ -417,6 +428,15 @@ public class DefaultActivity extends AppCompatActivity
         myRef.child(key).child("menuitem").setValue(menuitem);
         myRef.child(key).child("rating").setValue(rating);
         myRef.child(key).child("description").setValue(description);
+        myRef.child(key).child("date_submitted").setValue(currentTime);
+
+        key = restaurantRef.push().getKey();
+        restaurantRef.child(key).child("username").setValue(username);
+        restaurantRef.child(key).child("restaurant_name").setValue(restaurant_name);
+        restaurantRef.child(key).child("menuitem").setValue(menuitem);
+        restaurantRef.child(key).child("rating").setValue(rating);
+        restaurantRef.child(key).child("description").setValue(description);
+        restaurantRef.child(key).child("date_submitted").setValue(currentTime);
 
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
@@ -444,6 +464,7 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
         ActionBar ab = getSupportActionBar();
         selectNavOption("restaurant_summary_fragment");
+        ab.setTitle("Restaurant Reviews");
     }
 
     @Override

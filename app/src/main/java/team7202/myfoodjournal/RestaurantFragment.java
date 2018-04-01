@@ -15,6 +15,15 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.google.android.gms.location.places.Place;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +42,8 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
     private RestaurantFragment.OnRestaurantInteractionListener mListener;
     private View view;
 
+    private List<Map<String, String>> data;
+    private SimpleAdapter adapter;
     public RestaurantFragment() {
         // Required empty public constructor
     }
@@ -69,23 +80,42 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         TextView title = (TextView) view.findViewById(R.id.name_header);
 
         final DefaultActivity activity = (DefaultActivity) getActivity();
-        final CharSequence name = activity.getRestaurantName().getName();
-        title.setText(name);
-        HashMap<String, ReviewData> allreviews = activity.getAllReviews();
-        List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+        final Place restaurantName = activity.getRestaurantName();
+        title.setText(restaurantName.getName());
+
+
+        data = new ArrayList<Map<String, String>>();
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
-        for (String key: allreviews.keySet()) {
-            ReviewData reviewdatum = allreviews.get(key);
-            Map<String, String> datum = new HashMap<String, String>(3);
-            datum.put(keyStrings[0], reviewdatum.menuitem);
-            datum.put(keyStrings[1], reviewdatum.description);
-            datum.put(keyStrings[2], reviewdatum.rating + "/5");
-            data.add(datum);
-        }
-        SimpleAdapter adapter = new SimpleAdapter(getContext(), data,
+
+        DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurantName.getId());
+
+        adapter = new SimpleAdapter(getContext(), data,
                 R.layout.myreview_row, keyStrings,
                 new int[] {R.id.text1, R.id.text2, R.id.text3});
         listview.setAdapter(adapter);
+
+        restaurantRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                data.clear();
+                for (DataSnapshot entry : dataSnapshot.getChildren()) {
+                    Map reviewInfo = (Map) entry.getValue();
+                    Map<String, String> datum = new HashMap<>(4);
+                    datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
+                    datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
+                    datum.put("Description", (String) reviewInfo.get("description"));
+                    datum.put("Rating", reviewInfo.get("rating") + "/5");
+                    datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                    data.add(datum);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
             @Override
@@ -93,12 +123,13 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                 TextView menuItem = (TextView) view.findViewById(R.id.text1);
                 TextView description = (TextView) view.findViewById(R.id.text2);
                 TextView rating = (TextView) view.findViewById(R.id.text3);
-                CharSequence[] information = {name, menuItem.getText(), rating.getText(),
+                CharSequence[] information = {restaurantName.getName(), menuItem.getText(), rating.getText(),
                         description.getText()};
                 Fragment fragment = DetailedReviewFragment.newInstance(information);
                 getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
             }
         };
+
         listview.setOnItemClickListener(listListener);
         Button sortByButton = (Button) view.findViewById(R.id.sortby_button);
         sortByButton.setOnClickListener(this);

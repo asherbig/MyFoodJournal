@@ -15,6 +15,14 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.SimpleAdapter;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,26 +84,42 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         sortByButton.setText("Sort By: \nMost Recent");
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
         fab.setOnClickListener(this);
+
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
-        DefaultActivity activity = (DefaultActivity) getActivity();
-        HashMap<String, ReviewData> allreviews = activity.getAllReviews();
         data = new ArrayList<Map<String, String>>();
-        for (String key: allreviews.keySet()) {
-            ReviewData reviewdatum = allreviews.get(key);
-            Map<String, String> datum = new HashMap<String, String>(4);
-            datum.put("Restaurant Name", reviewdatum.restaurant_name);
-            datum.put("Menu Item", reviewdatum.menuitem);
-            datum.put("Description", reviewdatum.description);
-            datum.put("Rating", reviewdatum.rating + "/5");
-            datum.put("Date Submitted", reviewdatum.date_submitted);
-            data.add(datum);
-        }
-         adapter = new SimpleAdapter(getContext(), data,
-                R.layout.myreview_row,
-                new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
-                new int[] {R.id.text1,
-                        R.id.text2, R.id.text3, R.id.text4});
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
+
+        adapter = new SimpleAdapter(getContext(), data,
+               R.layout.myreview_row,
+               new String[] {"Restaurant Name", "Menu Item", "Description", "Rating"},
+               new int[] {R.id.text1,
+                       R.id.text2, R.id.text3, R.id.text4});
         listview.setAdapter(adapter);
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                data.clear();
+                for (DataSnapshot entry : dataSnapshot.getChildren()) {
+                    Map reviewInfo = (Map) entry.getValue();
+                    Map<String, String> datum = new HashMap<>(4);
+                    datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
+                    datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
+                    datum.put("Description", (String) reviewInfo.get("description"));
+                    datum.put("Rating", reviewInfo.get("rating") + "/5");
+                    datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                    data.add(datum);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -103,6 +127,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 adapterView.getItemAtPosition(position);
             }
         };
+
         listview.setOnItemClickListener(listListener);
         return view;
     }
