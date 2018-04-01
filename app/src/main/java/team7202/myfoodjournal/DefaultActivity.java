@@ -154,25 +154,25 @@ public class DefaultActivity extends AppCompatActivity
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
         if (option.equals("fragment_profile")) {
-            Fragment fragment = ProfileFragment.newInstance(option);
+            Fragment fragment = ProfileFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_edit_profile")) {
-            Fragment fragment = EditProfileFragment.newInstance(option, this);
+            Fragment fragment = EditProfileFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_edit_password")) {
-            Fragment fragment = EditPasswordFragment.newInstance(option, this);
+            Fragment fragment = EditPasswordFragment.newInstance(this);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_wishlist")) {
-            Fragment fragment = WishlistFragment.newInstance(option);
+            Fragment fragment = WishlistFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_myreviews")) {
-            Fragment fragment = MyReviewsFragment.newInstance(option);
+            Fragment fragment = MyReviewsFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("fragment_add_review")) {
-            Fragment fragment = AddReviewFragment.newInstance(option);
+            Fragment fragment = AddReviewFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else if (option.equals("restaurant_summary_fragment")) {
-            Fragment fragment = RestaurantFragment.newInstance(option);
+            Fragment fragment = RestaurantFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();

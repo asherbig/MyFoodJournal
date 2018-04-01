@@ -41,15 +41,11 @@ public class EditPasswordFragment extends Fragment implements View.OnClickListen
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment EditPasswordFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static EditPasswordFragment newInstance(String menuOptionParam, Context context) {
+    public static EditPasswordFragment newInstance(Context context) {
         EditPasswordFragment fragment = new EditPasswordFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_MENU_OPTION, menuOptionParam);
-        fragment.setArguments(args);
         baseContext = context;
         return fragment;
     }
