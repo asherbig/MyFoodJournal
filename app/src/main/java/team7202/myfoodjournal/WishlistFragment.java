@@ -7,6 +7,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Zach on 2/11/2018.
@@ -21,6 +36,8 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
 
     private OnWishlistInteractionListener mListener;
     private View view;
+    private List<Map<String, String>> data;
+    private SimpleAdapter adapter;
 
     public WishlistFragment() {
         // Required empty public constructor
@@ -54,6 +71,41 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_wishlist, container, false);
+
+        ListView listview = (ListView) view.findViewById(R.id.listviewID);
+        data = new ArrayList<Map<String, String>>();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
+
+        adapter = new SimpleAdapter(getContext(), data,
+                R.layout.wishlist_row,
+                new String[] {"Restaurant Name", "Address", "Menu Item"},
+                new int[] {R.id.text1, R.id.text2, R.id.text3});
+
+        wishlistRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                data.clear();
+                for (DataSnapshot entry : dataSnapshot.getChildren()) {
+                    Map reviewInfo = (Map) entry.getValue();
+                    Map<String, String> datum = new HashMap<>(4);
+                    datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
+                    datum.put("Address", (String) reviewInfo.get("address"));
+                    datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
+                    datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                    data.add(datum);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        listview.setAdapter(adapter);
         Button filtersButton = (Button) view.findViewById(R.id.filters_button);
         filtersButton.setOnClickListener(this);
         Button sortByButton = (Button) view.findViewById(R.id.sortby_button);

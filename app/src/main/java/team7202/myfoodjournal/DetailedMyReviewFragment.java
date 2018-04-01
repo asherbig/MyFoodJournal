@@ -21,11 +21,13 @@ import java.util.Map;
 
 public class DetailedMyReviewFragment extends Fragment implements View.OnClickListener {
     private static Map<String, String> reviewInfo;
+    private static boolean source;
     private View view;
     private Place restaurantName;
     private DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener mListener;
-    public static DetailedMyReviewFragment newInstance(Map<String, String> information) {
+    public static DetailedMyReviewFragment newInstance(Map<String, String> information, boolean inMyReviews) {
         DetailedMyReviewFragment fragment = new DetailedMyReviewFragment();
+        source = inMyReviews;
         reviewInfo = information;
         return fragment;
     }
@@ -88,7 +90,7 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
                 break;
             case (R.id.cancel_button):
                 if (mListener != null) {
-                    mListener.onCancelButtonClicked(true);
+                    mListener.onCancelButtonClicked(source);
                 }
                 break;
         }
@@ -97,6 +99,6 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
     public interface OnMyDetailedReviewInteractionListener {
         // TODO: Update argument type and name
         void onEditReviewButtonClicked();
-        void onCancelButtonClicked(boolean inMyReviews);
+        void onCancelButtonClicked(boolean source);
     }
 }

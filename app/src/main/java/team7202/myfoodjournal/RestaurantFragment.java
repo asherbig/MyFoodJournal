@@ -87,7 +87,7 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurantName.getId());
 
         adapter = new SimpleAdapter(getContext(), data,
-                R.layout.myreview_row, keyStrings,
+                R.layout.restaurantreview_row, keyStrings,
                 new int[] {R.id.text1, R.id.text2, R.id.text3});
         listview.setAdapter(adapter);
 
@@ -124,7 +124,7 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
                 Fragment fragment;
                 if (info.get("UserId").equals(user.getUid())) {
-                    fragment = DetailedMyReviewFragment.newInstance(info);
+                    fragment = DetailedMyReviewFragment.newInstance(info, false);
                 } else {
                     fragment = DetailedResReviewFragment.newInstance(info);
                 }

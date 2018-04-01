@@ -453,7 +453,7 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("WISHLIST BUTTON CLICKED", "Wishlist button clicked by user.");
         final String currentTime = "" + (System.currentTimeMillis() / 1000);
         final String reviewId = reviewInfo.get("ReviewId");
-        final String restaurant_name = reviewInfo.get("Restaurant Name");
+        final String nameString = reviewInfo.get("Restaurant Name");
         final String menuitem = reviewInfo.get("Menu Item");
 
         FirebaseUser user = mAuth.getCurrentUser();
@@ -464,10 +464,16 @@ public class DefaultActivity extends AppCompatActivity
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.hasChild(reviewId)) {
-
+                        final View view = findViewById(R.id.fragment_title);
+                        Snackbar.make(view, "This review is already in your wishlist", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     } else {
-                        WishlistData entryData = new WishlistData(reviewId, restaurant_name, restaurantName.getId(), menuitem, currentTime);
+                        WishlistData entryData = new WishlistData(nameString, restaurantName.getId(),
+                                (String) restaurantName.getAddress(), menuitem, currentTime);
                         wishlistRef.child(reviewId).setValue(entryData);
+                        final View view = findViewById(R.id.fragment_title);
+                        Snackbar.make(view, "Successfully added item to wishlist", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     }
                 }
 
