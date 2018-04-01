@@ -23,7 +23,7 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
     private static Map<String, String> reviewInfo;
     private static boolean source;
     private View view;
-    private Place restaurantName;
+
     private DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener mListener;
     public static DetailedMyReviewFragment newInstance(Map<String, String> information, boolean inMyReviews) {
         DetailedMyReviewFragment fragment = new DetailedMyReviewFragment();
@@ -49,9 +49,6 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
         rating.setText(reviewInfo.get("Rating"));
         TextView description = (TextView) view.findViewById(R.id.description_value);
         description.setText(reviewInfo.get("Description"));
-
-        final DefaultActivity activity = (DefaultActivity) getActivity();
-        restaurantName = activity.getRestaurantName();
 
         Button editReviewButton = (Button) view.findViewById(R.id.edit_review_button);
         editReviewButton.setOnClickListener(this);
@@ -85,7 +82,7 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
             // which should swap the fragment to go to the right fragment
             case (R.id.edit_review_button):
                 if (mListener != null) {
-                    DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurantName.getId());
+                    mListener.onEditReviewButtonClicked(reviewInfo);
                 }
                 break;
             case (R.id.cancel_button):
@@ -98,7 +95,7 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
 
     public interface OnMyDetailedReviewInteractionListener {
         // TODO: Update argument type and name
-        void onEditReviewButtonClicked();
+        void onEditReviewButtonClicked(Map<String, String> information);
         void onCancelButtonClicked(boolean source);
     }
 }

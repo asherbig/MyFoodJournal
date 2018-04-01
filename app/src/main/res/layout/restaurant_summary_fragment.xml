@@ -12,9 +12,17 @@
             android:id="@+id/name_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_marginTop="70dp"
+            android:gravity="center"
             android:text="[Pulled Restaurant Name]"
+            android:textSize="25sp" />
+
+        <TextView
+            android:id="@+id/address_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="[Pulled Restaurant Address]"
             android:textSize="25sp" />
 
         <SearchView
@@ -59,16 +67,5 @@
         </ListView>
 
     </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="30dp"
-        android:layout_marginEnd="12dp"
-        android:src="@android:drawable/ic_menu_edit" />
 
 </RelativeLayout>

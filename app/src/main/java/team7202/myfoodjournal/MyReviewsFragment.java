@@ -55,15 +55,10 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment ProfileFragment.
      */
-    public static MyReviewsFragment newInstance(String menuOptionParam) {
-        MyReviewsFragment fragment = new MyReviewsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_MENU_OPTION, menuOptionParam);
-        fragment.setArguments(args);
-        return fragment;
+    public static MyReviewsFragment newInstance() {
+        return new MyReviewsFragment();
     }
 
     @Override
@@ -88,7 +83,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         fab.setOnClickListener(this);
 
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
-        data = new ArrayList<Map<String, String>>();
+        data = new ArrayList<>();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
@@ -108,7 +103,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 filters = DefaultActivity.getMyReviewsFilters();
                 for (DataSnapshot entry : dataSnapshot.getChildren()) {
                     Map reviewInfo = (Map) entry.getValue();
-
                     //check to see if the review should be included
                     if (shouldInclude(reviewInfo, filters)) {
                         Map<String, String> datum = new HashMap<>(4);
@@ -117,7 +111,9 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                         datum.put("Description", (String) reviewInfo.get("description"));
                         datum.put("Rating", reviewInfo.get("rating") + "/5");
                         datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
-                        data.add(datum);
+                        datum.put("UserId", (String) reviewInfo.get("userId"));
+                        datum.put("Review ID", (String) reviewInfo.get("reviewId"));
+                        datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
                     }
                 }
                 adapter.notifyDataSetChanged();
@@ -133,11 +129,12 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
                 Fragment fragment = DetailedMyReviewFragment.newInstance(info, true);
-                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
             }
         };
 
         listview.setOnItemClickListener(listListener);
+        Collections.sort(data, time_comparator);
         return view;
     }
 
@@ -213,7 +210,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
 
 
     public void onSortByButtonClicked() {
-        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        Log.d("MYREVIEWS", "Sort By button clicked on MyReviews page");
         final View anchor = view.findViewById(R.id.sortby_button);
         PopupMenu popup = new PopupMenu(getContext(), anchor);
         getActivity().getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());

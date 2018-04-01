@@ -126,6 +126,22 @@ public class DefaultActivity extends AppCompatActivity
                 }
         );
         mAuth = FirebaseAuth.getInstance();
+
+        /* Manages the BackStack, which alows for back button functionality.
+         * Also handles changing the ActionBar title when appropriate. When switching
+         * fragments, add .addToBackStack(s), where s is the desired title on the ActionBar.
+         */
+        getFragmentManager().addOnBackStackChangedListener(
+                new FragmentManager.OnBackStackChangedListener() {
+                    @Override
+                    public void onBackStackChanged() {
+                        String newTitle = getFragmentManager().getBackStackEntryAt(getFragmentManager().getBackStackEntryCount() - 1).getName();
+                        if (newTitle != null) {
+                            ab.setTitle(newTitle);
+                        }
+                    }
+                }
+        );
     }
 
     private String getLayoutName(int resourceId) {
@@ -154,26 +170,26 @@ public class DefaultActivity extends AppCompatActivity
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
         if (option.equals("fragment_profile")) {
-            Fragment fragment = ProfileFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = ProfileFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Profile").commit();
         } else if (option.equals("fragment_edit_profile")) {
-            Fragment fragment = EditProfileFragment.newInstance(option, this);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = EditProfileFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Profile").commit();
         } else if (option.equals("fragment_edit_password")) {
-            Fragment fragment = EditPasswordFragment.newInstance(option, this);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = EditPasswordFragment.newInstance(this);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Password").commit();
         } else if (option.equals("fragment_wishlist")) {
-            Fragment fragment = WishlistFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = WishlistFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Wishlist").commit();
         } else if (option.equals("fragment_myreviews")) {
-            Fragment fragment = MyReviewsFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = MyReviewsFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
         } else if (option.equals("fragment_add_review")) {
-            Fragment fragment = AddReviewFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = AddReviewFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Add Review").commit();
         } else if (option.equals("restaurant_summary_fragment")) {
-            Fragment fragment = RestaurantFragment.newInstance(option);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            Fragment fragment = RestaurantFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Restaurant Reviews").commit();
         } else {
             Fragment fragment = new PageFragment();
             Bundle args = new Bundle();
@@ -222,8 +238,6 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("PROFILE", "Edit profile clicked");
 
         selectNavOption("fragment_edit_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Edit Profile");
     }
 
     //opens the edit password screen
@@ -231,8 +245,6 @@ public class DefaultActivity extends AppCompatActivity
     public void onChangePassClicked() {
         Log.d("PROFILE", "Change password clicked");
         selectNavOption("fragment_edit_password");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Edit Password");
     }
 
     //methods for the edit profile interface
@@ -242,8 +254,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Save profile button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     //returns to the profile summary screen
@@ -252,8 +262,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Cancel profile edit button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     //methods for the edit password fragment interface
@@ -263,8 +271,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Save password button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     //returns to the profile summary screen
@@ -273,8 +279,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Cancel password edit button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     @Override
@@ -359,7 +363,6 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ActionBar ab = getSupportActionBar();
         if (resultCode == RESULT_OK) {
             Place place = PlaceAutocomplete.getPlace(this, data);
 
@@ -377,11 +380,9 @@ public class DefaultActivity extends AppCompatActivity
                 switch (requestCode) {
                     case (1):
                         selectNavOption("fragment_add_review");
-                        ab.setTitle("Add Review");
                         break;
                     case (2):
                         selectNavOption("restaurant_summary_fragment");
-                        ab.setTitle("Restaurant Reviews");
                         break;
                 }
             } else {
@@ -397,7 +398,8 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem, int rating, String description) {
+    public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem,
+                                    int rating, String description, String reviewId) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
@@ -411,27 +413,29 @@ public class DefaultActivity extends AppCompatActivity
         String currentTime = "" + (System.currentTimeMillis() / 1000);
 
         FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference myRef = root.child("my_reviews").child(user.getUid());
+        final DatabaseReference restaurantRef = root.child("restaurants").child(restaurant_id);
 
-        DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurant_id);
-
-        String key = myRef.push().getKey();
-        ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_name, menuitem, rating, description, currentTime);
-        myRef.child(key).setValue(reviewData);
-        restaurantRef.child(key).setValue(reviewData);
-
-        //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
+        if (reviewId.equals("")) {
+            final String key = myRef.push().getKey();
+            ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_id,
+                    restaurant_name, menuitem, rating, description, currentTime);
+            myRef.child(key).setValue(reviewData);
+            restaurantRef.child(key).setValue(reviewData);
+        } else {
+            ReviewData reviewData = new ReviewData(reviewId, user.getUid(), restaurant_id,
+                    restaurant_name, menuitem, rating, description, currentTime);
+            myRef.child(reviewId).setValue(reviewData);
+            restaurantRef.child(reviewId).setValue(reviewData);
+        }
         selectNavOption("fragment_myreviews");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("My Reviews");
     }
 
     @Override
     public void onAddReviewCancelClicked() {
         Log.d("CANCEL REVIEW", "Canceled review written by user.");
         selectNavOption("fragment_myreviews");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("My Reviews");
     }
 
     @Override
@@ -444,13 +448,10 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onCancelButtonClicked(boolean inMyReviews) {
         Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
-        ActionBar ab = getSupportActionBar();
         if (inMyReviews) {
             selectNavOption("fragment_myreviews");
-            ab.setTitle("My Reviews");
         } else {
             selectNavOption("restaurant_summary_fragment");
-            ab.setTitle("Restaurant Reviews");
         }
     }
 
@@ -474,8 +475,8 @@ public class DefaultActivity extends AppCompatActivity
                         Snackbar.make(view, "This review is already in your wishlist", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     } else {
-                        WishlistData entryData = new WishlistData(nameString, restaurantName.getId(),
-                                (String) restaurantName.getAddress(), menuitem, currentTime);
+                        WishlistData entryData = new WishlistData(reviewId, nameString,
+                                restaurantName.getId(), (String) restaurantName.getAddress(), menuitem, currentTime);
                         wishlistRef.child(reviewId).setValue(entryData);
                         final View view = findViewById(R.id.fragment_title);
                         Snackbar.make(view, "Successfully added item to wishlist", Snackbar.LENGTH_LONG)
@@ -492,7 +493,8 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onEditReviewButtonClicked() {
-
+    public void onEditReviewButtonClicked(Map<String, String> reviewInfo) {
+        Fragment fragment = AddReviewFragment.newInstance(reviewInfo, true);
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Review").commit();
     }
 }
