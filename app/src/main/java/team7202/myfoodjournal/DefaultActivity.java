@@ -126,6 +126,11 @@ public class DefaultActivity extends AppCompatActivity
                 }
         );
         mAuth = FirebaseAuth.getInstance();
+
+        /* Manages the BackStack, which alows for back button functionality.
+         * Also handles changing the ActionBar title when appropriate. When switching
+         * fragments, add .addToBackStack(s), where s is the desired title on the ActionBar.
+         */
         getFragmentManager().addOnBackStackChangedListener(
                 new FragmentManager.OnBackStackChangedListener() {
                     @Override
