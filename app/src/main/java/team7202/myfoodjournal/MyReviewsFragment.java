@@ -81,7 +81,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         fab.setOnClickListener(this);
 
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
-        data = new ArrayList<Map<String, String>>();
+        data = new ArrayList<>();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
@@ -105,6 +105,9 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                     datum.put("Description", (String) reviewInfo.get("description"));
                     datum.put("Rating", reviewInfo.get("rating") + "/5");
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                    datum.put("UserId", (String) reviewInfo.get("userId"));
+                    datum.put("Review ID", (String) reviewInfo.get("reviewId"));
+                    datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
                     data.add(datum);
                 }
                 adapter.notifyDataSetChanged();

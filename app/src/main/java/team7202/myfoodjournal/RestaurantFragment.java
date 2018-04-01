@@ -31,11 +31,7 @@ import java.util.Map;
  */
 
 public class RestaurantFragment extends Fragment implements View.OnClickListener {
-    private static final String ARG_MENU_OPTION = "menu_option";
-
     //parameters
-    private String menuOptionParam;
-
     private RestaurantFragment.OnRestaurantInteractionListener mListener;
     private View view;
 
@@ -58,9 +54,6 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
-        }
     }
 
     @Override
@@ -70,13 +63,15 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         String[] keyStrings = {"Menu Item", "Description", "Rating"};
         view = inflater.inflate(R.layout.restaurant_summary_fragment, container, false);
         TextView title = (TextView) view.findViewById(R.id.name_header);
+        TextView address = (TextView) view.findViewById(R.id.address_header);
 
         final DefaultActivity activity = (DefaultActivity) getActivity();
         final Place restaurantName = activity.getRestaurantName();
         title.setText(restaurantName.getName());
+        address.setText(restaurantName.getAddress());
 
 
-        data = new ArrayList<Map<String, String>>();
+        data = new ArrayList<>();
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
 
         DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurantName.getId());
@@ -101,7 +96,8 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                     datum.put("Rating", reviewInfo.get("rating") + "/5");
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
                     datum.put("UserId", (String) reviewInfo.get("userId"));
-                    datum.put("ReviewId", (String) reviewInfo.get("reviewId"));
+                    datum.put("Review ID", (String) reviewInfo.get("reviewId"));
+                    datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
                     data.add(datum);
                 }
                 adapter.notifyDataSetChanged();

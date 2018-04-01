@@ -1,6 +1,5 @@
 package team7202.myfoodjournal;
 
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -11,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -183,7 +181,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
             add_review_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Fragment fragment = AddReviewFragment.newInstance(entry);
+                    Fragment fragment = AddReviewFragment.newInstance(entry, false);
                     getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                     Log.d("TEST", "Successfully registered onClick in ListView entry.");
                 }

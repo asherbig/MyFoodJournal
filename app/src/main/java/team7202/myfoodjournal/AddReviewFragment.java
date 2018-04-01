@@ -34,10 +34,7 @@ import java.util.Map;
  */
 public class AddReviewFragment extends Fragment implements View.OnClickListener {
 
-    private static final String ARG_MENU_OPTION = "menu_option";
-
     //parameters
-    private String menuOptionParam;
 
     private OnAddReviewListener mListener;
     private View view;
@@ -45,6 +42,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
     private Place restaurantName;
 
     private static Map<String, String> reviewInfo;
+    private static boolean editReview;
 
     private EditText menuitem;
     private EditText rating;
@@ -62,25 +60,28 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      * @return A new instance of fragment ProfileFragment.
      */
     public static AddReviewFragment newInstance() {
+        reviewInfo = null;
         return new AddReviewFragment();
     }
-    public static AddReviewFragment newInstance(Map<String, String> information) {
+
+    public static AddReviewFragment newInstance(Map<String, String> information, boolean isEdit) {
         reviewInfo = information;
+        editReview = isEdit;
         return new AddReviewFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        DefaultActivity activity = (DefaultActivity) getActivity();
+        restaurantName = activity.getRestaurantName();
+
         view = inflater.inflate(R.layout.fragment_add_review, container, false);
         Button saveButton = (Button) view.findViewById(R.id.save_button);
         saveButton.setOnClickListener(this);
@@ -89,20 +90,24 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
 
         TextView restaurantNameText = (TextView) view.findViewById(R.id.restname);
         menuitem = (EditText) view.findViewById(R.id.menu_item);
-
-        if (reviewInfo != null) {
-            restaurantNameText.setText(reviewInfo.get("Restaurant Name"));
-            menuitem.setText(reviewInfo.get("Menu Item"));
-            menuitem.setFocusable(false);
-        } else {
-            DefaultActivity activity = (DefaultActivity) getActivity();
-            restaurantName = activity.getRestaurantName();
-            restaurantNameText.setText(restaurantName.getName());
-
-            menuitem = (EditText) view.findViewById(R.id.menu_item);
-        }
         rating = (EditText) view.findViewById(R.id.rating_entry);
         description = (EditText) view.findViewById(R.id.description_entry);
+
+        if (reviewInfo != null) {
+            if (editReview) {
+                restaurantNameText.setText(reviewInfo.get("Restaurant Name"));
+                menuitem.setText(reviewInfo.get("Menu Item"));
+                rating.setText(reviewInfo.get("Rating"));
+                description.setText(reviewInfo.get("Description"));
+            } else {
+                restaurantNameText.setText(reviewInfo.get("Restaurant Name"));
+                menuitem.setText(reviewInfo.get("Menu Item"));
+                menuitem.setFocusable(false);
+            }
+        } else {
+            restaurantNameText.setText(restaurantName.getName());
+        }
+
         return view;
     }
 
@@ -113,7 +118,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
             mListener = (OnAddReviewListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnAddReviewListener");
         }
     }
 
@@ -127,14 +132,17 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         final String INCOMPLETE_FIELDS = "One or more fields cannot be left blank and rating must be between 1 and 5";
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         switch (v.getId()) {
             //Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
             case (R.id.save_button):
+                Log.d("TEST", "Save Button clicked");
                 if (mListener != null) {
-                    if (reviewInfo != null) {
+                    Log.d("TEST", "Listener active");
+                    if (reviewInfo != null && !editReview) {
+                        Log.d("TEST", "Add Review from Wishlist");
                         try {
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                             final DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
 
                             wishlistRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -156,16 +164,36 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
                                     reviewInfo.get("Restaurant Name"),
                                     reviewInfo.get("Menu Item"),
                                     Integer.valueOf(rating.getText().toString()),
-                                    description.getText().toString());
+                                    description.getText().toString(), "");
                         } catch (Exception e) {
                             Log.d("BIG EXCEPTION", e.getMessage());
                             Snackbar.make(view, INCOMPLETE_FIELDS, Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
-                    } else {
+                    } else if (reviewInfo != null) {
+                        Log.d("TEST", "Edit My Review");
                         try {
-                            mListener.onSaveReviewClicked(restaurantName.getId(), restaurantName.getName().toString(), menuitem.getText().toString(), Integer.valueOf(rating.getText().toString()), description.getText().toString());
+                            mListener.onSaveReviewClicked(reviewInfo.get("Restaurant ID"),
+                                    reviewInfo.get("Restaurant Name"),
+                                    menuitem.getText().toString(),
+                                    Integer.valueOf(rating.getText().toString()),
+                                    description.getText().toString(),
+                                    reviewInfo.get("Review ID"));
                         } catch (Exception e) {
+                            Log.d("BIG EXCEPTION", Log.getStackTraceString(e));
+                            Snackbar.make(view, INCOMPLETE_FIELDS, Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        }
+                    } else {
+                        Log.d("TEST", "Add Brand New Review");
+                        try {
+                            mListener.onSaveReviewClicked(restaurantName.getId(),
+                                    restaurantName.getName().toString(),
+                                    menuitem.getText().toString(),
+                                    Integer.valueOf(rating.getText().toString()),
+                                    description.getText().toString(), "");
+                        } catch (Exception e) {
+                            Log.d("BIG EXCEPTION", e.getMessage());
                             Snackbar.make(view, INCOMPLETE_FIELDS, Snackbar.LENGTH_LONG)
                                     .setAction("Action", null).show();
                         }
@@ -185,13 +213,10 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnAddReviewListener {
-        void onSaveReviewClicked(String id, String name, String menuitem, int rating, String description);
+        void onSaveReviewClicked(String id, String name, String menuitem, int rating,
+                                 String description, String reviewId);
         void onAddReviewCancelClicked();
     }
 }
