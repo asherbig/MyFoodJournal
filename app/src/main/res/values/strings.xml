@@ -42,4 +42,6 @@
     <string name="return_label">Return</string>
     <string name="email_hint">Please enter email address</string>
     <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
+
+    <!-- Key Strings for Entry Retrieval -->
 </resources>

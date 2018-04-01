@@ -158,32 +158,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
 
-            Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
-            startActivity(i);
-            finish();
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
+                                startActivity(i);
+                                finish();
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                                Intent i = new Intent(LoginActivity.this, LoginActivity.class);
+                                startActivity(i);
+                                finish();
 
-//            mAuth.signInWithEmailAndPassword(email, password)
-//                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-//                        @Override
-//                        public void onComplete(@NonNull Task<AuthResult> task) {
-//                            if (task.isSuccessful()) {
-//                                // Sign in success, update UI with the signed-in user's information
-//                                FirebaseUser user = mAuth.getCurrentUser();
-//                                Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
-//                                startActivity(i);
-//                                finish();
-//                            } else {
-//                                // If sign in fails, display a message to the user.
-//                                Toast.makeText(LoginActivity.this, "Authentication failed.",
-//                                        Toast.LENGTH_SHORT).show();
-//                                Intent i = new Intent(LoginActivity.this, LoginActivity.class);
-//                                startActivity(i);
-//                                finish();
-//
-//
-//                            }
-//                        }
-//                    });
+
+                            }
+                        }
+                    });
         }
     }
 

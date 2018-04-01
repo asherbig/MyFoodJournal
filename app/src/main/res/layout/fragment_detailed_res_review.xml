@@ -35,7 +35,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="10dp"
                     android:text="Restuarant Name HERE"
-                    android:textAlignment="textStart"
+                    android:textAlignment="center"
                     android:textSize="24sp" />
 
                 <TextView
@@ -45,6 +45,7 @@
                     android:paddingLeft="10dp"
                     android:paddingTop="10dp"
                     android:text="Menu Item Name HERE"
+                    android:textAlignment="center"
                     android:textSize="24sp" />
 
                 <LinearLayout
@@ -55,7 +56,7 @@
 
                     <TextView
                         android:id="@+id/rating_header"
-                        android:layout_width="20dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:paddingLeft="50dp"
@@ -64,9 +65,9 @@
                         android:textSize="24sp"
                         android:textStyle="italic" />
 
-                    <EditText
+                    <TextView
                         android:id="@+id/rating_value"
-                        android:layout_width="57dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ems="10"
@@ -83,7 +84,7 @@
 
                     <TextView
                         android:id="@+id/description_header"
-                        android:layout_width="wrap_content"
+                        android:layout_width="95dp"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="25dp"
                         android:layout_weight="1"
@@ -91,7 +92,7 @@
                         android:textSize="24sp"
                         android:textStyle="italic" />
 
-                    <EditText
+                    <TextView
                         android:id="@+id/description_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

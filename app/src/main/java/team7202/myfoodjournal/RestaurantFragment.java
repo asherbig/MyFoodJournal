@@ -6,10 +6,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 
+import com.google.android.gms.location.places.Place;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -24,22 +27,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Zach on 2/11/2018.
+ * Created by Zach on 3/30/2018.
  */
 
-public class WishlistFragment extends Fragment implements View.OnClickListener {
-
+public class RestaurantFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_MENU_OPTION = "menu_option";
 
     //parameters
     private String menuOptionParam;
 
-    private OnWishlistInteractionListener mListener;
+    private RestaurantFragment.OnRestaurantInteractionListener mListener;
     private View view;
+
     private List<Map<String, String>> data;
     private SimpleAdapter adapter;
-
-    public WishlistFragment() {
+    public RestaurantFragment() {
         // Required empty public constructor
     }
 
@@ -50,8 +52,8 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
      * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment ProfileFragment.
      */
-    public static WishlistFragment newInstance(String menuOptionParam) {
-        WishlistFragment fragment = new WishlistFragment();
+    public static RestaurantFragment newInstance(String menuOptionParam) {
+        RestaurantFragment fragment = new RestaurantFragment();
         Bundle args = new Bundle();
         args.putString(ARG_MENU_OPTION, menuOptionParam);
         fragment.setArguments(args);
@@ -70,20 +72,28 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_wishlist, container, false);
+        String[] keyStrings = {"Menu Item", "Description", "Rating"};
+        view = inflater.inflate(R.layout.restaurant_summary_fragment, container, false);
+        TextView title = (TextView) view.findViewById(R.id.name_header);
 
-        ListView listview = (ListView) view.findViewById(R.id.listviewID);
+        final DefaultActivity activity = (DefaultActivity) getActivity();
+        final Place restaurantName = activity.getRestaurantName();
+        title.setText(restaurantName.getName());
+
+
         data = new ArrayList<Map<String, String>>();
+        ListView listview = (ListView) view.findViewById(R.id.listviewID);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
+        DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurantName.getId());
 
         adapter = new SimpleAdapter(getContext(), data,
-                R.layout.wishlist_row,
-                new String[] {"Restaurant Name", "Address", "Menu Item"},
+                R.layout.restaurantreview_row, keyStrings,
                 new int[] {R.id.text1, R.id.text2, R.id.text3});
+        listview.setAdapter(adapter);
 
-        wishlistRef.addValueEventListener(new ValueEventListener() {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        restaurantRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 data.clear();
@@ -91,9 +101,12 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
                     Map reviewInfo = (Map) entry.getValue();
                     Map<String, String> datum = new HashMap<>(4);
                     datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
-                    datum.put("Address", (String) reviewInfo.get("address"));
                     datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
+                    datum.put("Description", (String) reviewInfo.get("description"));
+                    datum.put("Rating", reviewInfo.get("rating") + "/5");
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                    datum.put("UserId", (String) reviewInfo.get("userId"));
+                    datum.put("ReviewId", (String) reviewInfo.get("reviewId"));
                     data.add(datum);
                 }
                 adapter.notifyDataSetChanged();
@@ -105,9 +118,21 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-        listview.setAdapter(adapter);
-        Button filtersButton = (Button) view.findViewById(R.id.filters_button);
-        filtersButton.setOnClickListener(this);
+        AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
+                Fragment fragment;
+                if (info.get("UserId").equals(user.getUid())) {
+                    fragment = DetailedMyReviewFragment.newInstance(info, false);
+                } else {
+                    fragment = DetailedResReviewFragment.newInstance(info);
+                }
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            }
+        };
+
+        listview.setOnItemClickListener(listListener);
         Button sortByButton = (Button) view.findViewById(R.id.sortby_button);
         sortByButton.setOnClickListener(this);
         sortByButton.setText("Sort By: \nMost Recent");
@@ -117,11 +142,11 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnWishlistInteractionListener) {
-            mListener = (OnWishlistInteractionListener) context;
+        if (context instanceof RestaurantFragment.OnRestaurantInteractionListener) {
+            mListener = (RestaurantFragment.OnRestaurantInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnWishlistInteractionListener");
+                    + " must implement OnRestaurantInteractionListener");
         }
     }
 
@@ -137,9 +162,9 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             // Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
-            case (R.id.filters_button):
+            case (R.id.search_bar):
                 if (mListener != null) {
-                    mListener.onFilterButtonClicked();
+                    mListener.onSearchBarClicked();
                 }
                 break;
             case (R.id.sortby_button):
@@ -160,9 +185,9 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnWishlistInteractionListener {
+    public interface OnRestaurantInteractionListener {
         // TODO: Update argument type and name
-        void onFilterButtonClicked();
+        void onSearchBarClicked();
         void onSortByButtonClicked();
     }
 }

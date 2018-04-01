@@ -184,7 +184,7 @@ public class RegisterActivity extends AppCompatActivity {
         //TODO Talk to Ben about implementation
 
         //Pull in values from EditText Views
-        String username = usernameEditText.getText().toString();
+        final String username = usernameEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         String first_name = first_nameEditText.getText().toString();
         String last_name = last_nameEditText.getText().toString();
@@ -247,6 +247,9 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
+
+                                FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("username").setValue(username);
+
                                 Intent i = new Intent(RegisterActivity.this, DefaultActivity.class);
                                 startActivity(i);
                                 finish();

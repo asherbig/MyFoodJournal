@@ -3,6 +3,7 @@ package team7202.myfoodjournal;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,7 +112,12 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
             // which should swap the fragment to go to the right fragment
             case (R.id.save_button):
                 if (mListener != null) {
-                    mListener.onSaveReviewClicked(restaurantName.getId(), restaurantName.getName().toString(), menuitem.getText().toString(), Integer.valueOf(rating.getText().toString()), description.getText().toString());
+                    try {
+                        mListener.onSaveReviewClicked(restaurantName.getId(), restaurantName.getName().toString(), menuitem.getText().toString(), Integer.valueOf(rating.getText().toString()), description.getText().toString());
+                    } catch (Exception e) {
+                        Snackbar.make(view, "One or more fields cannot be left blank and rating must be between 1 and 5", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
                 }
                 break;
             case (R.id.cancel_button):
@@ -133,7 +139,6 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnAddReviewListener {
-        // TODO: Update argument type and name
         void onSaveReviewClicked(String id, String name, String menuitem, int rating, String description);
         void onAddReviewCancelClicked();
     }

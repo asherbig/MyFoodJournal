@@ -5,7 +5,6 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
@@ -22,14 +21,20 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
@@ -38,15 +43,19 @@ public class DefaultActivity extends AppCompatActivity
         WishlistFragment.OnWishlistInteractionListener,
         FilterMenuDialogFragment.OnFilterInteractionListener,
         MyReviewsFragment.OnMyReviewsInteractionListener,
-        AddReviewFragment.OnAddReviewListener {
+        AddReviewFragment.OnAddReviewListener,
+        RestaurantFragment.OnRestaurantInteractionListener,
+        DetailedResReviewFragment.OnResReviewInteractionListener,
+        DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
 
     public Place restaurantName;
 
-    public HashMap<String, ReviewData> allreviews;
     private ArrayList<String> myReviewFilters = new ArrayList<>();
+
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,9 +110,12 @@ public class DefaultActivity extends AppCompatActivity
                             Intent i = new Intent(DefaultActivity.this, LoginActivity.class);
                             startActivity(i);
                             finish();
+                        } else if (layout.equals("Restaurants")) {
+                            menuItem.setChecked(true);
+                            loadPlaces(2);
+                            mDrawerLayout.closeDrawers();
                         } else {
                             selectNavOption(layout);
-                          
                             // Updates selected item and title, then closes the drawer
                             menuItem.setChecked(true);
                             ab.setTitle(menuItem.getTitle());
@@ -113,7 +125,7 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
-        allreviews = new HashMap<>();
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private String getLayoutName(int resourceId) {
@@ -121,6 +133,9 @@ public class DefaultActivity extends AppCompatActivity
         switch(resourceId) {
             case R.id.nav_myreviews:
                 layoutName = "fragment_myreviews";
+                break;
+            case R.id.nav_restaurants:
+                layoutName = "Restaurants";
                 break;
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
@@ -156,6 +171,9 @@ public class DefaultActivity extends AppCompatActivity
         } else if (option.equals("fragment_add_review")) {
             Fragment fragment = AddReviewFragment.newInstance(option);
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } else if (option.equals("restaurant_summary_fragment")) {
+            Fragment fragment = RestaurantFragment.newInstance(option);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
         } else {
             Fragment fragment = new PageFragment();
             Bundle args = new Bundle();
@@ -180,13 +198,6 @@ public class DefaultActivity extends AppCompatActivity
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_default, menu);
-//        return true;
-//    }
-//
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         /* Pass the event to ActionBarDrawerToggle, if it returns true, then it has
@@ -284,7 +295,7 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onSortByButtonClicked() {
-        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        Log.d("SORTBY", "Sort By button clicked");
         final View anchor = findViewById(R.id.sortby_button);
         PopupMenu popup = new PopupMenu(this, anchor);
         getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
@@ -314,7 +325,10 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onFloatingButtonClicked() {
-        int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+        loadPlaces(1);
+    }
+
+    private void loadPlaces(int requestCode) {
         AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
                 .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
                 .build();
@@ -322,8 +336,7 @@ public class DefaultActivity extends AppCompatActivity
             Intent intent =
                     new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
                             .build(this);
-            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-            System.out.println("2");
+            startActivityForResult(intent, requestCode);
         } catch (GooglePlayServicesRepairableException e) {
             final View view = findViewById(R.id.fab);
             Snackbar.make(view, "Update your Google Play Services!", Snackbar.LENGTH_LONG)
@@ -335,43 +348,40 @@ public class DefaultActivity extends AppCompatActivity
                     .setAction("Action", null).show();
 
         }
-//
-//        final View view = findViewById(R.id.fab);
-//        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show();
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                boolean isRestaurant = false;
-                for (int i : place.getPlaceTypes()) {
-                    if (i == Place.TYPE_RESTAURANT) {
-                        isRestaurant = true;
+        ActionBar ab = getSupportActionBar();
+        if (resultCode == RESULT_OK) {
+            Place place = PlaceAutocomplete.getPlace(this, data);
+
+            boolean isTaggedRestaurant = false;
+            List<Integer> placeTypes = place.getPlaceTypes();
+            for (int i = 0; i < placeTypes.size(); i++) {
+                if (placeTypes.get(i) == Place.TYPE_RESTAURANT) {
+                    isTaggedRestaurant = true;
+                    break;
+                }
+            }
+
+            if (isTaggedRestaurant) {
+                restaurantName = place;
+                switch (requestCode) {
+                    case (1):
+                        selectNavOption("fragment_add_review");
+                        ab.setTitle("Add Review");
                         break;
-                    }
+                    case (2):
+                        selectNavOption("restaurant_summary_fragment");
+                        ab.setTitle("Restaurant Reviews");
+                        break;
                 }
-                if (isRestaurant) {
-                    restaurantName = place;
-                    Log.d("ADD REVIEW", "Add review floating button clicked.");
-                    selectNavOption("fragment_add_review");
-                    ActionBar ab = getSupportActionBar();
-                    ab.setTitle("Add Review");
-
-                } else {
-                    final View view = findViewById(R.id.fab);
-                    Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                System.out.println(status);
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
+            } else {
+                final View view = findViewById(R.id.fab);
+                Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         }
     }
@@ -380,17 +390,30 @@ public class DefaultActivity extends AppCompatActivity
         return restaurantName;
     }
 
-    public HashMap<String, ReviewData> getAllReviews() {
-        return allreviews;
-    }
-
     @Override
     public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem, int rating, String description) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
         View headerView = mNavigationView.getHeaderView(0);
         String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
+        final View view = findViewById(R.id.fab);
+        if (rating < 1 || rating > 5) {
+            Snackbar.make(view, "Rating must be between 1 and 5", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+            return;
+        }
 
-        allreviews.put(restaurant_id, new ReviewData(restaurant_name, menuitem, rating, description, "" + (System.currentTimeMillis() / 1000)));
+        String currentTime = "" + (System.currentTimeMillis() / 1000);
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
+
+        DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurant_id);
+
+        String key = myRef.push().getKey();
+        ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_name, menuitem, rating, description, currentTime);
+        myRef.child(key).setValue(reviewData);
+        restaurantRef.child(key).setValue(reviewData);
+
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
@@ -403,5 +426,67 @@ public class DefaultActivity extends AppCompatActivity
         selectNavOption("fragment_myreviews");
         ActionBar ab = getSupportActionBar();
         ab.setTitle("My Reviews");
+    }
+
+    @Override
+    public void onSearchBarClicked() {
+        Log.d("SEARCH BAR CLICKED", "Search bar clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        ab.setTitle("Search Bar successfully clicked.");
+    }
+
+    @Override
+    public void onCancelButtonClicked(boolean inMyReviews) {
+        Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
+        ActionBar ab = getSupportActionBar();
+        if (inMyReviews) {
+            selectNavOption("fragment_myreviews");
+            ab.setTitle("My Reviews");
+        } else {
+            selectNavOption("restaurant_summary_fragment");
+            ab.setTitle("Restaurant Reviews");
+        }
+    }
+
+    @Override
+    public void onAddWishlistButtonClicked(Map<String, String> reviewInfo) {
+        Log.d("WISHLIST BUTTON CLICKED", "Wishlist button clicked by user.");
+        final String currentTime = "" + (System.currentTimeMillis() / 1000);
+        final String reviewId = reviewInfo.get("ReviewId");
+        final String nameString = reviewInfo.get("Restaurant Name");
+        final String menuitem = reviewInfo.get("Menu Item");
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        final DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
+
+        if (wishlistRef != null) {
+            wishlistRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChild(reviewId)) {
+                        final View view = findViewById(R.id.fragment_title);
+                        Snackbar.make(view, "This review is already in your wishlist", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    } else {
+                        WishlistData entryData = new WishlistData(nameString, restaurantName.getId(),
+                                (String) restaurantName.getAddress(), menuitem, currentTime);
+                        wishlistRef.child(reviewId).setValue(entryData);
+                        final View view = findViewById(R.id.fragment_title);
+                        Snackbar.make(view, "Successfully added item to wishlist", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onEditReviewButtonClicked() {
+
     }
 }
