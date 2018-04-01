@@ -123,7 +123,7 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                 } else {
                     fragment = DetailedResReviewFragment.newInstance(info);
                 }
-                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Restaurant Reviews").commit();
             }
         };
 

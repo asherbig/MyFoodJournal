@@ -120,7 +120,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
                 Fragment fragment = DetailedMyReviewFragment.newInstance(info, true);
-                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
             }
         };
 
