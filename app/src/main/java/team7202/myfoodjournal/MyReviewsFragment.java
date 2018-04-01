@@ -125,6 +125,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         };
 
         listview.setOnItemClickListener(listListener);
+        Collections.sort(data, time_comparator);
         return view;
     }
 
@@ -200,7 +201,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
 
 
     public void onSortByButtonClicked() {
-        Log.d("WISHLIST", "Sort By button clicked on Wishlist page");
+        Log.d("MYREVIEWS", "Sort By button clicked on MyReviews page");
         final View anchor = view.findViewById(R.id.sortby_button);
         PopupMenu popup = new PopupMenu(getContext(), anchor);
         getActivity().getMenuInflater().inflate(R.menu.sortby_menu, popup.getMenu());
