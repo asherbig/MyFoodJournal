@@ -126,6 +126,17 @@ public class DefaultActivity extends AppCompatActivity
                 }
         );
         mAuth = FirebaseAuth.getInstance();
+        getFragmentManager().addOnBackStackChangedListener(
+                new FragmentManager.OnBackStackChangedListener() {
+                    @Override
+                    public void onBackStackChanged() {
+                        String newTitle = getFragmentManager().getBackStackEntryAt(getFragmentManager().getBackStackEntryCount() - 1).getName();
+                        if (newTitle != null) {
+                            ab.setTitle(newTitle);
+                        }
+                    }
+                }
+        );
     }
 
     private String getLayoutName(int resourceId) {
@@ -155,25 +166,25 @@ public class DefaultActivity extends AppCompatActivity
         // Create a new fragment and specify the screen to show based on the option selected
         if (option.equals("fragment_profile")) {
             Fragment fragment = ProfileFragment.newInstance();
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Profile").commit();
         } else if (option.equals("fragment_edit_profile")) {
             Fragment fragment = EditProfileFragment.newInstance();
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Profile").commit();
         } else if (option.equals("fragment_edit_password")) {
             Fragment fragment = EditPasswordFragment.newInstance(this);
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Password").commit();
         } else if (option.equals("fragment_wishlist")) {
             Fragment fragment = WishlistFragment.newInstance();
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Wishlist").commit();
         } else if (option.equals("fragment_myreviews")) {
             Fragment fragment = MyReviewsFragment.newInstance();
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
         } else if (option.equals("fragment_add_review")) {
             Fragment fragment = AddReviewFragment.newInstance();
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Add Review").commit();
         } else if (option.equals("restaurant_summary_fragment")) {
             Fragment fragment = RestaurantFragment.newInstance();
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Restaurant Reviews").commit();
         } else {
             Fragment fragment = new PageFragment();
             Bundle args = new Bundle();
@@ -222,8 +233,6 @@ public class DefaultActivity extends AppCompatActivity
         Log.d("PROFILE", "Edit profile clicked");
 
         selectNavOption("fragment_edit_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Edit Profile");
     }
 
     //opens the edit password screen
@@ -231,8 +240,6 @@ public class DefaultActivity extends AppCompatActivity
     public void onChangePassClicked() {
         Log.d("PROFILE", "Change password clicked");
         selectNavOption("fragment_edit_password");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Edit Password");
     }
 
     //methods for the edit profile interface
@@ -242,8 +249,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Save profile button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     //returns to the profile summary screen
@@ -252,8 +257,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Cancel profile edit button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     //methods for the edit password fragment interface
@@ -263,8 +266,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Save password button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     //returns to the profile summary screen
@@ -273,8 +274,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         Log.d("PROFILE EDIT", "Cancel password edit button clicked");
         selectNavOption("fragment_profile");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Profile");
     }
 
     @Override
@@ -353,7 +352,6 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        ActionBar ab = getSupportActionBar();
         if (resultCode == RESULT_OK) {
             Place place = PlaceAutocomplete.getPlace(this, data);
 
@@ -371,11 +369,9 @@ public class DefaultActivity extends AppCompatActivity
                 switch (requestCode) {
                     case (1):
                         selectNavOption("fragment_add_review");
-                        ab.setTitle("Add Review");
                         break;
                     case (2):
                         selectNavOption("restaurant_summary_fragment");
-                        ab.setTitle("Restaurant Reviews");
                         break;
                 }
             } else {
@@ -416,16 +412,12 @@ public class DefaultActivity extends AppCompatActivity
 
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("My Reviews");
     }
 
     @Override
     public void onAddReviewCancelClicked() {
         Log.d("CANCEL REVIEW", "Canceled review written by user.");
         selectNavOption("fragment_myreviews");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("My Reviews");
     }
 
     @Override
@@ -438,13 +430,10 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onCancelButtonClicked(boolean inMyReviews) {
         Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
-        ActionBar ab = getSupportActionBar();
         if (inMyReviews) {
             selectNavOption("fragment_myreviews");
-            ab.setTitle("My Reviews");
         } else {
             selectNavOption("restaurant_summary_fragment");
-            ab.setTitle("Restaurant Reviews");
         }
     }
 
