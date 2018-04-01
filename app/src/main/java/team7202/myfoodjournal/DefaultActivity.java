@@ -5,11 +5,8 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.database.DatabaseUtilsCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,7 +21,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
@@ -37,8 +33,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,14 +45,14 @@ public class DefaultActivity extends AppCompatActivity
         MyReviewsFragment.OnMyReviewsInteractionListener,
         AddReviewFragment.OnAddReviewListener,
         RestaurantFragment.OnRestaurantInteractionListener,
-        DetailedReviewFragment.OnReviewInteractionListener {
+        DetailedResReviewFragment.OnResReviewInteractionListener,
+        DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
 
     public Place restaurantName;
 
-    public HashMap<String, ReviewData> allreviews;
     private ArrayList<String> myReviewFilters = new ArrayList<>();
 
     private FirebaseAuth mAuth;
@@ -131,8 +125,6 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
-        allreviews = new HashMap<>();
-
         mAuth = FirebaseAuth.getInstance();
     }
 
@@ -398,10 +390,6 @@ public class DefaultActivity extends AppCompatActivity
         return restaurantName;
     }
 
-    public HashMap<String, ReviewData> getAllReviews() {
-        return allreviews;
-    }
-
     @Override
     public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem, int rating, String description) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
@@ -415,7 +403,6 @@ public class DefaultActivity extends AppCompatActivity
         }
 
         String currentTime = "" + (System.currentTimeMillis() / 1000);
-        allreviews.put(restaurant_id + ":" + menuitem, new ReviewData(restaurant_name, menuitem, rating, description, currentTime));
 
         FirebaseUser user = mAuth.getCurrentUser();
         DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
@@ -423,20 +410,9 @@ public class DefaultActivity extends AppCompatActivity
         DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurant_id);
 
         String key = myRef.push().getKey();
-        myRef.child(key).child("username").setValue(username);
-        myRef.child(key).child("restaurant_name").setValue(restaurant_name);
-        myRef.child(key).child("menuitem").setValue(menuitem);
-        myRef.child(key).child("rating").setValue(rating);
-        myRef.child(key).child("description").setValue(description);
-        myRef.child(key).child("date_submitted").setValue(currentTime);
-
-        key = restaurantRef.push().getKey();
-        restaurantRef.child(key).child("username").setValue(username);
-        restaurantRef.child(key).child("restaurant_name").setValue(restaurant_name);
-        restaurantRef.child(key).child("menuitem").setValue(menuitem);
-        restaurantRef.child(key).child("rating").setValue(rating);
-        restaurantRef.child(key).child("description").setValue(description);
-        restaurantRef.child(key).child("date_submitted").setValue(currentTime);
+        ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_name, menuitem, rating, description, currentTime);
+        myRef.child(key).setValue(reviewData);
+        restaurantRef.child(key).setValue(reviewData);
 
         //TODO: PUSH THE INFORMATION (username, id, menuitem, rating, description) to database
         selectNavOption("fragment_myreviews");
@@ -460,17 +436,51 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCancelButtonClicked() {
+    public void onCancelButtonClicked(boolean inMyReviews) {
         Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
         ActionBar ab = getSupportActionBar();
-        selectNavOption("restaurant_summary_fragment");
-        ab.setTitle("Restaurant Reviews");
+        if (inMyReviews) {
+            selectNavOption("fragment_myreviews");
+            ab.setTitle("My Reviews");
+        } else {
+            selectNavOption("restaurant_summary_fragment");
+            ab.setTitle("Restaurant Reviews");
+        }
     }
 
     @Override
-    public void onAddWishlistButtonClicked() {
+    public void onAddWishlistButtonClicked(Map<String, String> reviewInfo) {
         Log.d("WISHLIST BUTTON CLICKED", "Wishlist button clicked by user.");
-        ActionBar ab = getSupportActionBar();
-        ab.setTitle("Wishlist Button clicked");
+        final String currentTime = "" + (System.currentTimeMillis() / 1000);
+        final String reviewId = reviewInfo.get("ReviewId");
+        final String restaurant_name = reviewInfo.get("Restaurant Name");
+        final String menuitem = reviewInfo.get("Menu Item");
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        final DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
+
+        if (wishlistRef != null) {
+            wishlistRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.hasChild(reviewId)) {
+
+                    } else {
+                        WishlistData entryData = new WishlistData(reviewId, restaurant_name, restaurantName.getId(), menuitem, currentTime);
+                        wishlistRef.child(reviewId).setValue(entryData);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onEditReviewButtonClicked() {
+
     }
 }

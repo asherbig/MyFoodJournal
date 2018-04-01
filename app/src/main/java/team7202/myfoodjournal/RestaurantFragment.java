@@ -1,16 +1,13 @@
 package team7202.myfoodjournal;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -94,6 +91,8 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                 new int[] {R.id.text1, R.id.text2, R.id.text3});
         listview.setAdapter(adapter);
 
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
         restaurantRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -106,6 +105,8 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                     datum.put("Description", (String) reviewInfo.get("description"));
                     datum.put("Rating", reviewInfo.get("rating") + "/5");
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                    datum.put("UserId", (String) reviewInfo.get("userId"));
+                    datum.put("ReviewId", (String) reviewInfo.get("reviewId"));
                     data.add(datum);
                 }
                 adapter.notifyDataSetChanged();
@@ -120,12 +121,13 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                TextView menuItem = (TextView) view.findViewById(R.id.text1);
-                TextView description = (TextView) view.findViewById(R.id.text2);
-                TextView rating = (TextView) view.findViewById(R.id.text3);
-                CharSequence[] information = {restaurantName.getName(), menuItem.getText(), rating.getText(),
-                        description.getText()};
-                Fragment fragment = DetailedReviewFragment.newInstance(information);
+                Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
+                Fragment fragment;
+                if (info.get("UserId").equals(user.getUid())) {
+                    fragment = DetailedMyReviewFragment.newInstance(info);
+                } else {
+                    fragment = DetailedResReviewFragment.newInstance(info);
+                }
                 getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
             }
         };

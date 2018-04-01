@@ -123,8 +123,8 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-
-                adapterView.getItemAtPosition(position);
+                Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
+                Fragment fragment = DetailedMyReviewFragment.newInstance(info);
             }
         };
 
