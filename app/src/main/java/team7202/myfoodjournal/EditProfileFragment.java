@@ -39,16 +39,10 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment EditProfileFragment.
      */
-    public static EditProfileFragment newInstance(String menuOptionParam, Context context) {
-        EditProfileFragment fragment = new EditProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_MENU_OPTION, menuOptionParam);
-        fragment.setArguments(args);
-        baseContext = context;
-        return fragment;
+    public static EditProfileFragment newInstance() {
+        return new EditProfileFragment();
     }
 
     @Override

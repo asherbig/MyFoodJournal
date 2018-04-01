@@ -53,15 +53,10 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment ProfileFragment.
      */
-    public static MyReviewsFragment newInstance(String menuOptionParam) {
-        MyReviewsFragment fragment = new MyReviewsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_MENU_OPTION, menuOptionParam);
-        fragment.setArguments(args);
-        return fragment;
+    public static MyReviewsFragment newInstance() {
+        return new MyReviewsFragment();
     }
 
     @Override

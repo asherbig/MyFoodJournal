@@ -37,15 +37,10 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param menuOptionParam the menu option being initialized.
      * @return A new instance of fragment ProfileFragment.
      */
-    public static ProfileFragment newInstance(String menuOptionParam) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_MENU_OPTION, menuOptionParam);
-        fragment.setArguments(args);
-        return fragment;
+    public static ProfileFragment newInstance() {
+        return new ProfileFragment();
     }
 
     @Override
