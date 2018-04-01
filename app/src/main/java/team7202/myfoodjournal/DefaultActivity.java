@@ -405,11 +405,11 @@ public class DefaultActivity extends AppCompatActivity
         String currentTime = "" + (System.currentTimeMillis() / 1000);
 
         FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("my_reviews").child(user.getUid());
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference myRef = root.child("my_reviews").child(user.getUid());
+        DatabaseReference restaurantRef = root.child("restaurants").child(restaurant_id);
 
-        DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference().child("restaurants").child(restaurant_id);
-
-        String key = myRef.push().getKey();
+        final String key = myRef.push().getKey();
         ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_name, menuitem, rating, description, currentTime);
         myRef.child(key).setValue(reviewData);
         restaurantRef.child(key).setValue(reviewData);
@@ -468,8 +468,8 @@ public class DefaultActivity extends AppCompatActivity
                         Snackbar.make(view, "This review is already in your wishlist", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     } else {
-                        WishlistData entryData = new WishlistData(nameString, restaurantName.getId(),
-                                (String) restaurantName.getAddress(), menuitem, currentTime);
+                        WishlistData entryData = new WishlistData(reviewId, nameString,
+                                restaurantName.getId(), (String) restaurantName.getAddress(), menuitem, currentTime);
                         wishlistRef.child(reviewId).setValue(entryData);
                         final View view = findViewById(R.id.fragment_title);
                         Snackbar.make(view, "Successfully added item to wishlist", Snackbar.LENGTH_LONG)

@@ -33,15 +33,10 @@ import java.util.Map;
 
 public class WishlistFragment extends Fragment implements View.OnClickListener {
 
-    private static final String ARG_MENU_OPTION = "menu_option";
-
     //parameters
-    private String menuOptionParam;
-
     private OnWishlistInteractionListener mListener;
     private View view;
     private List<Map<String, String>> data;
-    private SimpleAdapter adapter;
     private WishlistAdapter wishlistAdapter;
 
     public WishlistFragment() {
@@ -61,9 +56,6 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
-        }
     }
 
     @Override
@@ -73,7 +65,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
         view = inflater.inflate(R.layout.fragment_wishlist, container, false);
 
         ListView listview = (ListView) view.findViewById(R.id.listviewID);
-        data = new ArrayList<Map<String, String>>();
+        data = new ArrayList<>();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
@@ -86,8 +78,10 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
                 for (DataSnapshot entry : dataSnapshot.getChildren()) {
                     Map reviewInfo = (Map) entry.getValue();
                     Map<String, String> datum = new HashMap<>(4);
+                    datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                     datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
                     datum.put("Address", (String) reviewInfo.get("address"));
+                    datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
                     datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
                     data.add(datum);
@@ -170,7 +164,7 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // Get the data item for this position
-            Map<String, String> entry = getItem(position);
+            final Map<String, String> entry = getItem(position);
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.wishlist_row, parent, false);
@@ -189,6 +183,8 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
             add_review_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Fragment fragment = AddReviewFragment.newInstance(entry);
+                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                     Log.d("TEST", "Successfully registered onClick in ListView entry.");
                 }
             });
