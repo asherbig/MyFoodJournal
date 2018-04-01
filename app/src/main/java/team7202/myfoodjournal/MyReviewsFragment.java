@@ -43,8 +43,10 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
 
     private MyReviewsFragment.OnMyReviewsInteractionListener mListener;
     private View view;
-    private List<Map<String, String>> data;
-    private SimpleAdapter adapter;
+    private static List<Map<String, String>> data;
+    private static SimpleAdapter adapter;
+    private static ArrayList<String> filters;
+    private static DataSnapshot lastDataReceived;
     public MyReviewsFragment() {
         // Required empty public constructor
     }
@@ -101,16 +103,22 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                lastDataReceived = dataSnapshot;
                 data.clear();
+                filters = DefaultActivity.getMyReviewsFilters();
                 for (DataSnapshot entry : dataSnapshot.getChildren()) {
                     Map reviewInfo = (Map) entry.getValue();
-                    Map<String, String> datum = new HashMap<>(4);
-                    datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
-                    datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
-                    datum.put("Description", (String) reviewInfo.get("description"));
-                    datum.put("Rating", reviewInfo.get("rating") + "/5");
-                    datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
-                    data.add(datum);
+
+                    //check to see if the review should be included
+                    if (shouldInclude(reviewInfo, filters)) {
+                        Map<String, String> datum = new HashMap<>(4);
+                        datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
+                        datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
+                        datum.put("Description", (String) reviewInfo.get("description"));
+                        datum.put("Rating", reviewInfo.get("rating") + "/5");
+                        datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                        data.add(datum);
+                    }
                 }
                 adapter.notifyDataSetChanged();
             }
@@ -235,6 +243,43 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         });
 
         popup.show();
+    }
+
+    //checks a database entry against the filters to see if it should be included
+    private static boolean shouldInclude(Map listItem, ArrayList<String> filterList) {
+        if (filterList == null || filterList.size() == 0) {
+            //there's no filters, so everything should be included in the list
+            return true;
+        } else {
+            String name = (String) listItem.get("restaurant_name");
+            for (String filter: filterList) {
+                if (name.equals(filter)) {
+                    return true;
+                }
+            }
+        }
+        //if the restaurant name didn't match any of the filters
+        return false;
+    }
+
+    public static void applyFilters() {
+        data.clear();
+        filters = DefaultActivity.getMyReviewsFilters();
+        for (DataSnapshot entry : lastDataReceived.getChildren()) {
+            Map reviewInfo = (Map) entry.getValue();
+
+            //check to see if the review should be included
+            if (shouldInclude(reviewInfo, filters)) {
+                Map<String, String> datum = new HashMap<>(4);
+                datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
+                datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
+                datum.put("Description", (String) reviewInfo.get("description"));
+                datum.put("Rating", reviewInfo.get("rating") + "/5");
+                datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
+                data.add(datum);
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     /**

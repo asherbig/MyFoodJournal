@@ -53,7 +53,7 @@ public class DefaultActivity extends AppCompatActivity
 
     public Place restaurantName;
 
-    private ArrayList<String> myReviewFilters = new ArrayList<>();
+    private static ArrayList<String> myReviewFilters = new ArrayList<>();
 
     private FirebaseAuth mAuth;
 
@@ -290,7 +290,13 @@ public class DefaultActivity extends AppCompatActivity
     public void onApplyFiltersClicked(ArrayList<String> filtersList) {
         //make the filters apply
         myReviewFilters = filtersList;
+        MyReviewsFragment.applyFilters();
         Log.d("FILTERS", "Filters received from filters menu: " + filtersList.toString());
+    }
+
+    //public method used to get the filters for the MyReviews page
+    public static ArrayList<String> getMyReviewsFilters() {
+        return myReviewFilters;
     }
 
     @Override
