@@ -459,7 +459,7 @@ public class DefaultActivity extends AppCompatActivity
     public void onAddWishlistButtonClicked(Map<String, String> reviewInfo) {
         Log.d("WISHLIST BUTTON CLICKED", "Wishlist button clicked by user.");
         final String currentTime = "" + (System.currentTimeMillis() / 1000);
-        final String reviewId = reviewInfo.get("ReviewId");
+        final String reviewId = reviewInfo.get("Review ID");
         final String nameString = reviewInfo.get("Restaurant Name");
         final String menuitem = reviewInfo.get("Menu Item");
 
