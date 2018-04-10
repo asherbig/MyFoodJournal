@@ -114,6 +114,10 @@ public class DefaultActivity extends AppCompatActivity
                             menuItem.setChecked(true);
                             loadPlaces(2);
                             mDrawerLayout.closeDrawers();
+                        } else if (layout.equals("Search for User")) {
+                            SearchMenuDialogFragment searchMenu = SearchMenuDialogFragment.newInstance();
+                            FragmentManager fm = getFragmentManager();
+                            searchMenu.show(fm, "Search for User Menu generated");
                         } else {
                             selectNavOption(layout);
                             // Updates selected item and title, then closes the drawer

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
 
         <ScrollView
             android:id="@+id/detailed_review_form"
@@ -16,7 +20,7 @@
                 android:id="@+id/detailed_review_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/fragment_title"
@@ -47,6 +51,14 @@
                     android:text="Menu Item Name HERE"
                     android:textAlignment="center"
                     android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/username_review"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Reviewed by: placeholder"
+                    android:paddingTop="10dp"
+                    android:textAlignment="center"/>
 
                 <LinearLayout
                     android:id="@+id/rating_layout"
