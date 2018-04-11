@@ -31,11 +31,8 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
     private SearchView mRestaurantSearch;
     private ImageButton mCloseMenu;
     private Button mApplyFilter;
-    private OnFilterInteractionListener mListener;
+    private OnSearchInteractionListener mListener;
     private View view;
-    private ArrayList<String> filterList;
-    private SearchView filterSearch;
-    private FilterListAdapter adapter;
     private TextView searchText;
 
     public SearchMenuDialogFragment() {
@@ -63,27 +60,17 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
         mApplyFilter.setOnClickListener(this);
         searchText = (TextView) view.findViewById(R.id.searchUserContent);
 
-        //instantiate custom filter list adapter
-        FilterListAdapter adapter = new FilterListAdapter(filterList, getContext());
-        this.adapter = adapter;
-
-        //handle list-view and assign adapter
-        ListView lView = (ListView) view.findViewById(R.id.filter_list);
-        lView.setAdapter(adapter);
-
-        this.filterSearch = (SearchView) view.findViewById(R.id.restaurant_filter);
-
         return view;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof SearchMenuDialogFragment.OnFilterInteractionListener) {
-            mListener = (SearchMenuDialogFragment.OnFilterInteractionListener) context;
+        if (context instanceof SearchMenuDialogFragment.OnSearchInteractionListener) {
+            mListener = (SearchMenuDialogFragment.OnSearchInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFilterInteractionListener");
+                    + " must implement OnSearchInteractionListener");
         }
     }
 
@@ -100,78 +87,16 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
         switch (v.getId()) {
             // Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
-            case (R.id.restaurant_filter):
-                int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
-                AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
-                        .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
-                        .build();
-                try {
-                    Intent intent =
-                            new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
-                                    .build(getActivity());
-                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
-                    System.out.println("2");
-                } catch (GooglePlayServicesRepairableException e) {
-                    final View view = v.findViewById(R.id.fab);
-                    Snackbar.make(view, "Update your Google Play Services!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-
-                } catch (GooglePlayServicesNotAvailableException e) {
-                    final View view = v.findViewById(R.id.fab);
-                    Snackbar.make(view, "Google Play Services are currently unavailable.", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-
-                }
-                break;
-
-            case (R.id.apply_filter_button):
+            case (R.id.search_users_button):
                 if (mListener != null) {
-                    mListener.onApplyFiltersClicked(filterList);
+                    mListener.onSearchButtonClicked();
                 }
                 dismiss();
                 break;
 
-            case (R.id.closeFilterMenu):
-                if (mListener != null) {
-                    mListener.onApplyFiltersClicked(filterList);
-                }
+            case (R.id.closeSearchMenu):
                 dismiss();
-        }
-    }
-
-    //this adds a string to the filters list
-    private void addFilter(String toBeAdded) {
-        filterList.add(0, toBeAdded);
-        adapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(getActivity(), data);
-                boolean isRestaurant = false;
-                for (int i : place.getPlaceTypes()) {
-                    if (i == Place.TYPE_RESTAURANT) {
-                        isRestaurant = true;
-                        break;
-                    }
-                }
-                if (isRestaurant) {
-                    //Add "place.getName().toString()" to the search/text view
-                    addFilter(place.getName().toString());
-
-                } else {
-                    Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(getActivity(), data);
-                System.out.println(status);
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
+                break;
         }
     }
 
@@ -185,8 +110,8 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFilterInteractionListener {
+    public interface OnSearchInteractionListener {
         // TODO: Update argument type and name
-        void onApplyFiltersClicked(ArrayList<String> filters);
+        void onSearchButtonClicked();
     }
 }

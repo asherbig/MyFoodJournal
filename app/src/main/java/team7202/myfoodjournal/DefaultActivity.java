@@ -46,7 +46,8 @@ public class DefaultActivity extends AppCompatActivity
         AddReviewFragment.OnAddReviewListener,
         RestaurantFragment.OnRestaurantInteractionListener,
         DetailedResReviewFragment.OnResReviewInteractionListener,
-        DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener {
+        DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener,
+        SearchMenuDialogFragment.OnSearchInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -159,6 +160,9 @@ public class DefaultActivity extends AppCompatActivity
                 break;
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
+                break;
+            case R.id.nav_user_search:
+                layoutName = "Search for User";
                 break;
             case R.id.nav_wishlist:
                 layoutName = "fragment_wishlist";
@@ -457,6 +461,11 @@ public class DefaultActivity extends AppCompatActivity
         } else {
             selectNavOption("restaurant_summary_fragment");
         }
+    }
+
+    @Override
+    public void onSearchButtonClicked() {
+
     }
 
     @Override
