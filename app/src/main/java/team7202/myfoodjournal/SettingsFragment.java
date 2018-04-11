@@ -51,7 +51,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        view = inflater.inflate(R.layout.fragment_profile, container, false);
+        view = inflater.inflate(R.layout.fragment_settings, container, false);
         visibilitySwitch = (Switch) view.findViewById(R.id.visibilitySwitch);
         visibilitySwitch.setOnClickListener(this);
         visibilitySwitch.setChecked(UsernameSingleton.getInstance().getVisibility());

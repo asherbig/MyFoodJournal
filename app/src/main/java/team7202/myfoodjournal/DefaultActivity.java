@@ -160,6 +160,9 @@ public class DefaultActivity extends AppCompatActivity
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
                 break;
+            case R.id.nav_settings:
+                layoutName = "fragment_settings";
+                break;
             case R.id.nav_wishlist:
                 layoutName = "fragment_wishlist";
                 break;
@@ -194,6 +197,9 @@ public class DefaultActivity extends AppCompatActivity
         } else if (option.equals("restaurant_summary_fragment")) {
             Fragment fragment = RestaurantFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Restaurant Reviews").commit();
+        } else if (option.equals("fragment_settings")) {
+            Fragment fragment = SettingsFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Settings").commit();
         } else {
             Fragment fragment = new PageFragment();
             Bundle args = new Bundle();
