@@ -46,7 +46,8 @@ public class DefaultActivity extends AppCompatActivity
         AddReviewFragment.OnAddReviewListener,
         RestaurantFragment.OnRestaurantInteractionListener,
         DetailedResReviewFragment.OnResReviewInteractionListener,
-        DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener {
+        DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener,
+        SettingsFragment.OnSettingsInteractionListener {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -99,6 +100,9 @@ public class DefaultActivity extends AppCompatActivity
         View headerView = mNavigationView.getHeaderView(0);
         TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
         navUsername.setText(UsernameSingleton.getInstance().getUsername());
+
+        //TODO pull the profile visibility from firebase
+        //UsernameSingleton.getInstance().setVisibility(##FIREBASE VALUE##)
 
         // Creates listener for events when clicking on navigation drawer options.
         mNavigationView.setNavigationItemSelectedListener(
@@ -496,5 +500,11 @@ public class DefaultActivity extends AppCompatActivity
     public void onEditReviewButtonClicked(Map<String, String> reviewInfo) {
         Fragment fragment = AddReviewFragment.newInstance(reviewInfo, true);
         getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Review").commit();
+    }
+
+    @Override
+    public void onSettingSaveButtonClicked(boolean visibility) {
+        //TODO Send updated visibility to firebase, update profile
+        UsernameSingleton.getInstance().setVisibility(visibility);
     }
 }

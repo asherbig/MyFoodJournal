@@ -19,6 +19,11 @@ public class UsernameSingleton {
     }
 
     private String username;
+    private boolean profileVisibility;
+
+    public boolean getVisibility() { return profileVisibility; }
+
+    public void setVisibility(boolean visibility) { this.profileVisibility = visibility; }
 
     public String getUsername() {
         return username;
