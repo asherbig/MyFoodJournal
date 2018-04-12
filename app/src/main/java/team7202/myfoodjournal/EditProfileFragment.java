@@ -11,6 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -27,6 +30,7 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
     //parameters
     private String menuOptionParam;
     private static Context baseContext;
+    private EditText usernameField, emailField;
 
     private OnEditProfileListener mListener;
     private View view;
@@ -62,6 +66,9 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
         saveButton.setOnClickListener(this);
         Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(this);
+
+        usernameField = (EditText) view.findViewById(R.id.edit_username);
+        emailField = (EditText) view.findViewById(R.id.edit_email);
         return view;
     }
 
@@ -73,7 +80,7 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
             mListener = (OnEditProfileListener) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement OnEditProfileListener");
         }
     }
 
@@ -92,7 +99,19 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
             case (R.id.save_button):
 
                 if (mListener != null) {
-                    mListener.onProfileSaveClicked();
+                    String username = null;
+                    String email = null;
+
+                    String suggestion = usernameField.getText().toString();
+                    if (!suggestion.equals("") && isUsernameValid(suggestion)) {
+                        username = suggestion;
+                    }
+
+                    suggestion = emailField.getText().toString();
+                    if (!suggestion.equals("") && isEmailValid(suggestion)) {
+                        email = suggestion;
+                    }
+                    mListener.onProfileSaveClicked(username, email);
                 }
                 break;
             case (R.id.cancel_button):
@@ -103,6 +122,35 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
         }
     }
 
+    private boolean isUsernameValid(String username_input) {
+        Boolean isMatch;
+        String username_regex = "^\\w{5,12}$";
+        Pattern pattern = Pattern.compile(username_regex);
+        Matcher matcher = pattern.matcher(username_input);
+
+        //Check for Matches, whole string case
+        if (matcher.matches()) {
+            isMatch = true;
+        } else {
+            isMatch = false;
+        }
+        return isMatch;
+    }
+
+    private boolean isEmailValid(String email_input) {
+        Boolean isMatch;
+        String email_regex = "^([A-Z|a-z|0-9](\\.|_){0,1})+[A-Z|a-z|0-9]\\@([A-Z|a-z|0-9])+((\\.){0,1}[A-Z|a-z|0-9]){2}\\.[a-z]{2,3}$";
+        Pattern pattern = Pattern.compile(email_regex);
+        Matcher matcher = pattern.matcher(email_input);
+
+        //Check for Matches, whole string case
+        if (matcher.matches()) {
+            isMatch = true;
+        } else {
+            isMatch = false;
+        }
+        return isMatch;
+    }
 
     /**
      * This interface must be implemented by activities that contain this
@@ -115,7 +163,7 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnEditProfileListener {
-        void onProfileSaveClicked();
+        void onProfileSaveClicked(String username, String email);
         void onProfileCancelClicked();
     }
 }

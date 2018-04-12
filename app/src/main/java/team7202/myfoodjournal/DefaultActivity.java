@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
@@ -24,8 +25,11 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -96,11 +100,6 @@ public class DefaultActivity extends AppCompatActivity
         mNavigationView.getMenu().getItem(0).setChecked(true);
         ab.setTitle(mNavigationView.getMenu().getItem(0).getTitle());
 
-        // Sets the username in the navigation header
-        View headerView = mNavigationView.getHeaderView(0);
-        TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
-        navUsername.setText(UsernameSingleton.getInstance().getUsername());
-
         // Creates listener for events when clicking on navigation drawer options.
         mNavigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -131,6 +130,11 @@ public class DefaultActivity extends AppCompatActivity
                 }
         );
         mAuth = FirebaseAuth.getInstance();
+
+        // Sets the username in the navigation header
+        View headerView = mNavigationView.getHeaderView(0);
+        TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
+        navUsername.setText(mAuth.getCurrentUser().getDisplayName());
 
         /* Manages the BackStack, which alows for back button functionality.
          * Also handles changing the ActionBar title when appropriate. When switching
@@ -258,10 +262,40 @@ public class DefaultActivity extends AppCompatActivity
     //methods for the edit profile interface
     //returns to the profile screen
     @Override
-    public void onProfileSaveClicked() {
+    public void onProfileSaveClicked(String username, String email) {
         //TODO make the menuItem be currently selected
-        Log.d("PROFILE EDIT", "Save profile button clicked");
-        selectNavOption("fragment_profile");
+        final String newEmail = email;
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (username == null && email == null) {
+            Log.d("PROFILE EDIT", "No new changes");
+            selectNavOption("fragment_profile");
+        } else {
+            if (username != null) {
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(username).build();
+                user.updateProfile(profileUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Log.d("PROFILE EDIT", "Username updated");
+                                if (newEmail == null) {
+                                    selectNavOption("fragment_profile");
+                                }
+                            }
+                        });
+            }
+
+            if (email != null) {
+                user.updateEmail(newEmail).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.d("PROFILE EDIT", "Email updated");
+                        selectNavOption("fragment_profile");
+                    }
+                });
+            }
+        }
+
     }
 
     //returns to the profile summary screen

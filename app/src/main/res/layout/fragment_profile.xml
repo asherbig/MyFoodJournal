@@ -21,11 +21,11 @@
             android:id="@+id/name_header"/>
 
         <TextView
+            android:id="@+id/name_field"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="FirstName LastName"
-            android:textSize="20sp"
-            android:id="@+id/name"/>
+            android:textSize="20sp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -36,11 +36,11 @@
             android:id="@+id/username_header"/>
 
         <TextView
+            android:id="@+id/profile_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="[user username]"
-            android:textSize="20sp"
-            android:id="@+id/username"/>
+            android:textSize="20sp" />
 
 
         <TextView
@@ -52,11 +52,11 @@
             android:id="@+id/email_header"/>
 
         <TextView
+            android:id="@+id/profile_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="[user email]:"
-            android:textSize="20sp"
-            android:id="@+id/email"/>
+            android:textSize="20sp" />
 
         <TextView
             android:layout_width="wrap_content"

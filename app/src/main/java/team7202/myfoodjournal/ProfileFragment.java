@@ -9,6 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 /**
@@ -55,11 +59,17 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         view = inflater.inflate(R.layout.fragment_profile, container, false);
         Button editButton = (Button) view.findViewById(R.id.edit_button);
         editButton.setOnClickListener(this);
         Button passButton = (Button) view.findViewById(R.id.change_pass_button);
         passButton.setOnClickListener(this);
+
+        TextView usernameField = (TextView) view.findViewById(R.id.profile_username);
+        usernameField.setText(currentUser.getDisplayName());
+        TextView emailField = (TextView) view.findViewById(R.id.profile_email);
+        emailField.setText(currentUser.getEmail());
         return view;
     }
 
