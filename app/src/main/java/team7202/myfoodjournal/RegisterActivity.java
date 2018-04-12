@@ -79,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void validate(TextView textView, String text) {
                if (!isUsernameValid(text)) {
-                   usernameEditText.setError(getString(R.string.error_incorrect_username));
+                   usernameEditText.setError(getString(R.string.error_invalid_username));
                } else if (TextUtils.isEmpty(text)) {
                    usernameEditText.setError(getString(R.string.error_field_required));
                }
@@ -89,10 +89,12 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText.addTextChangedListener(new TextValidator(passwordEditText) {
             @Override
             public void validate(TextView textView, String text) {
-                if (!isPasswordValid(text)) {
-                    passwordEditText.setError(getString(R.string.error_invalid_password));
-                } else if (TextUtils.isEmpty(text)) {
+                if (TextUtils.isEmpty(text)) {
                     passwordEditText.setError(getString(R.string.error_field_required));
+                } else if (!isPasswordValid(text) && text.length() < 8) {
+                    passwordEditText.setError(getString(R.string.error_invalid_password));
+                } else if (!isPasswordValid(text)) {
+                    passwordEditText.setError(getString(R.string.error_incorrect_password));
                 }
             }
         });
@@ -182,8 +184,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void registerNewUser() {
-        //TODO Talk to Ben about implementation
-
         //Pull in values from EditText Views
         final String username = usernameEditText.getText().toString();
         String password = passwordEditText.getText().toString();
@@ -222,7 +222,7 @@ public class RegisterActivity extends AppCompatActivity {
             focusView = usernameEditText;
             cancel = true;
         } else if (!isUsernameValid(username)) {
-            usernameEditText.setError(getString(R.string.error_invalid_email));
+            usernameEditText.setError(getString(R.string.error_invalid_username));
             focusView = usernameEditText;
             cancel = true;
         }
