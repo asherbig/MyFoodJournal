@@ -56,11 +56,11 @@
                 android:id="@+id/username_header"/>
 
             <EditText
+                android:id="@+id/edit_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="Current Username"
-                android:textSize="20sp"
-                android:id="@+id/username"/>
+                android:textSize="20sp" />
 
 
             <TextView
@@ -72,11 +72,11 @@
                 android:id="@+id/email_header"/>
 
             <EditText
+                android:id="@+id/edit_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="Current Email:"
-                android:textSize="20sp"
-                android:id="@+id/email"/>
+                android:textSize="20sp" />
 
 
             <LinearLayout

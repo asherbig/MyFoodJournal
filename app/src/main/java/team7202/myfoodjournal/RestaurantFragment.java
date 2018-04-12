@@ -94,17 +94,18 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                 data.clear();
                 for (DataSnapshot entry : dataSnapshot.getChildren()) {
                     Map reviewInfo = (Map) entry.getValue();
-                    Map<String, String> datum = new HashMap<>(4);
+                    Map<String, String> datum = new HashMap<>();
                     datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
                     datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
                     datum.put("Description", (String) reviewInfo.get("description"));
                     datum.put("Rating", reviewInfo.get("rating") + "/5");
                     datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
-                    datum.put("UserId", (String) reviewInfo.get("userId"));
+                    datum.put("User ID", (String) reviewInfo.get("userId"));
                     datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                     datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
                     data.add(datum);
                 }
+                Collections.sort(data, time_comparator);
                 adapter.notifyDataSetChanged();
             }
 
@@ -119,7 +120,7 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
                 Fragment fragment;
-                if (info.get("UserId").equals(user.getUid())) {
+                if (info.get("User ID").equals(user.getUid())) {
                     fragment = DetailedMyReviewFragment.newInstance(info, false);
                 } else {
                     fragment = DetailedResReviewFragment.newInstance(info);
@@ -132,7 +133,6 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
         Button sortByButton = (Button) view.findViewById(R.id.sortby_button);
         sortByButton.setOnClickListener(this);
         sortByButton.setText("Sort By: \nMost Recent");
-        Collections.sort(data, time_comparator);
         return view;
     }
 

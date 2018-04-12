@@ -24,6 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -78,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void validate(TextView textView, String text) {
                if (!isUsernameValid(text)) {
-                   usernameEditText.setError(getString(R.string.error_incorrect_username));
+                   usernameEditText.setError(getString(R.string.error_invalid_username));
                } else if (TextUtils.isEmpty(text)) {
                    usernameEditText.setError(getString(R.string.error_field_required));
                }
@@ -88,10 +89,12 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText.addTextChangedListener(new TextValidator(passwordEditText) {
             @Override
             public void validate(TextView textView, String text) {
-                if (!isPasswordValid(text)) {
-                    passwordEditText.setError(getString(R.string.error_invalid_password));
-                } else if (TextUtils.isEmpty(text)) {
+                if (TextUtils.isEmpty(text)) {
                     passwordEditText.setError(getString(R.string.error_field_required));
+                } else if (!isPasswordValid(text) && text.length() < 8) {
+                    passwordEditText.setError(getString(R.string.error_invalid_password));
+                } else if (!isPasswordValid(text)) {
+                    passwordEditText.setError(getString(R.string.error_incorrect_password));
                 }
             }
         });
@@ -181,14 +184,12 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void registerNewUser() {
-        //TODO Talk to Ben about implementation
-
         //Pull in values from EditText Views
         final String username = usernameEditText.getText().toString();
         String password = passwordEditText.getText().toString();
         String first_name = first_nameEditText.getText().toString();
         String last_name = last_nameEditText.getText().toString();
-        String email = emailEditText.getText().toString();
+        final String email = emailEditText.getText().toString();
 
         // Reset errors.
         usernameEditText.setError(null);
@@ -221,7 +222,7 @@ public class RegisterActivity extends AppCompatActivity {
             focusView = usernameEditText;
             cancel = true;
         } else if (!isUsernameValid(username)) {
-            usernameEditText.setError(getString(R.string.error_invalid_email));
+            usernameEditText.setError(getString(R.string.error_invalid_username));
             focusView = usernameEditText;
             cancel = true;
         }
@@ -247,8 +248,13 @@ public class RegisterActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 FirebaseUser user = mAuth.getCurrentUser();
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(username).build();
+                                user.updateProfile(profileUpdates);
 
-                                FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid()).child("username").setValue(username);
+                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+                                UserData data = new UserData(username, email);
+                                userRef.setValue(data);
 
                                 Intent i = new Intent(RegisterActivity.this, DefaultActivity.class);
                                 startActivity(i);
