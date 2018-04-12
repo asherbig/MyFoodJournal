@@ -189,7 +189,7 @@ public class RegisterActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         String first_name = first_nameEditText.getText().toString();
         String last_name = last_nameEditText.getText().toString();
-        String email = emailEditText.getText().toString();
+        final String email = emailEditText.getText().toString();
 
         // Reset errors.
         usernameEditText.setError(null);
@@ -251,6 +251,10 @@ public class RegisterActivity extends AppCompatActivity {
                                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                         .setDisplayName(username).build();
                                 user.updateProfile(profileUpdates);
+
+                                DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+                                UserData data = new UserData(username, email);
+                                userRef.setValue(data);
 
                                 Intent i = new Intent(RegisterActivity.this, DefaultActivity.class);
                                 startActivity(i);

@@ -133,7 +133,7 @@ public class DefaultActivity extends AppCompatActivity
 
         // Sets the username in the navigation header
         View headerView = mNavigationView.getHeaderView(0);
-        TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
+        final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
         navUsername.setText(mAuth.getCurrentUser().getDisplayName());
 
         /* Manages the BackStack, which alows for back button functionality.
@@ -182,6 +182,10 @@ public class DefaultActivity extends AppCompatActivity
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
         if (option.equals("fragment_profile")) {
+            View headerView = mNavigationView.getHeaderView(0);
+            final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
+            navUsername.setText(mAuth.getCurrentUser().getDisplayName());
+
             Fragment fragment = ProfileFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Profile").commit();
         } else if (option.equals("fragment_edit_profile")) {
@@ -265,7 +269,9 @@ public class DefaultActivity extends AppCompatActivity
     public void onProfileSaveClicked(String username, String email) {
         //TODO make the menuItem be currently selected
         final String newEmail = email;
+        final String newUsername = username;
         FirebaseUser user = mAuth.getCurrentUser();
+        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
         if (username == null && email == null) {
             Log.d("PROFILE EDIT", "No new changes");
             selectNavOption("fragment_profile");
@@ -278,6 +284,7 @@ public class DefaultActivity extends AppCompatActivity
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 Log.d("PROFILE EDIT", "Username updated");
+                                myRef.child("username").setValue(newUsername);
                                 if (newEmail == null) {
                                     selectNavOption("fragment_profile");
                                 }
@@ -290,6 +297,7 @@ public class DefaultActivity extends AppCompatActivity
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.d("PROFILE EDIT", "Email updated");
+                        myRef.child("email").setValue(newEmail);
                         selectNavOption("fragment_profile");
                     }
                 });
@@ -443,8 +451,6 @@ public class DefaultActivity extends AppCompatActivity
     public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem,
                                     int rating, String description, String reviewId) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
-        View headerView = mNavigationView.getHeaderView(0);
-        String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
         final View view = findViewById(R.id.fab);
         if (rating < 1 || rating > 5) {
             Snackbar.make(view, "Rating must be between 1 and 5", Snackbar.LENGTH_LONG)
