@@ -187,8 +187,8 @@ public class RegisterActivity extends AppCompatActivity {
         //Pull in values from EditText Views
         final String username = usernameEditText.getText().toString();
         String password = passwordEditText.getText().toString();
-        String first_name = first_nameEditText.getText().toString();
-        String last_name = last_nameEditText.getText().toString();
+        final String first_name = first_nameEditText.getText().toString();
+        final String last_name = last_nameEditText.getText().toString();
         final String email = emailEditText.getText().toString();
 
         // Reset errors.
@@ -253,7 +253,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 user.updateProfile(profileUpdates);
 
                                 DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
-                                UserData data = new UserData(username, email);
+                                UserData data = new UserData(username, email, first_name, last_name);
                                 userRef.setValue(data);
 
                                 Intent i = new Intent(RegisterActivity.this, DefaultActivity.class);

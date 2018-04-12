@@ -60,7 +60,7 @@ public class DefaultActivity extends AppCompatActivity
 
     private static ArrayList<String> myReviewFilters = new ArrayList<>();
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +129,6 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
-        mAuth = FirebaseAuth.getInstance();
 
         // Sets the username in the navigation header
         View headerView = mNavigationView.getHeaderView(0);
@@ -266,16 +265,14 @@ public class DefaultActivity extends AppCompatActivity
     //methods for the edit profile interface
     //returns to the profile screen
     @Override
-    public void onProfileSaveClicked(String username, String email) {
+    public void onProfileSaveClicked(String username, String email, String firstName, String lastName) {
         //TODO make the menuItem be currently selected
         final String newEmail = email;
         final String newUsername = username;
         FirebaseUser user = mAuth.getCurrentUser();
         final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
-        if (username == null && email == null) {
-            Log.d("PROFILE EDIT", "No new changes");
-            selectNavOption("fragment_profile");
-        } else {
+
+        if (username != null || email != null || firstName != null || lastName != null) {
             if (username != null) {
                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                         .setDisplayName(username).build();
@@ -285,9 +282,6 @@ public class DefaultActivity extends AppCompatActivity
                             public void onComplete(@NonNull Task<Void> task) {
                                 Log.d("PROFILE EDIT", "Username updated");
                                 myRef.child("username").setValue(newUsername);
-                                if (newEmail == null) {
-                                    selectNavOption("fragment_profile");
-                                }
                             }
                         });
             }
@@ -298,11 +292,19 @@ public class DefaultActivity extends AppCompatActivity
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.d("PROFILE EDIT", "Email updated");
                         myRef.child("email").setValue(newEmail);
-                        selectNavOption("fragment_profile");
                     }
                 });
             }
+
+            if (firstName != null) {
+                myRef.child("firstname").setValue(firstName);
+            }
+
+            if (lastName != null) {
+                myRef.child("lastname").setValue(lastName);
+            }
         }
+        selectNavOption("fragment_profile");
 
     }
 

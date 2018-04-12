@@ -30,7 +30,7 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
     //parameters
     private String menuOptionParam;
     private static Context baseContext;
-    private EditText usernameField, emailField;
+    private EditText usernameField, emailField, firstNameField, lastNameField;
 
     private OnEditProfileListener mListener;
     private View view;
@@ -67,6 +67,8 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
         Button cancelButton = (Button) view.findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(this);
 
+        firstNameField = (EditText) view.findViewById(R.id.edit_first_name);
+        lastNameField = (EditText) view.findViewById(R.id.edit_last_name);
         usernameField = (EditText) view.findViewById(R.id.edit_username);
         emailField = (EditText) view.findViewById(R.id.edit_email);
         return view;
@@ -99,6 +101,8 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
             case (R.id.save_button):
 
                 if (mListener != null) {
+                    String firstname = null;
+                    String lastname = null;
                     String username = null;
                     String email = null;
 
@@ -111,7 +115,17 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
                     if (!suggestion.equals("") && isEmailValid(suggestion)) {
                         email = suggestion;
                     }
-                    mListener.onProfileSaveClicked(username, email);
+
+                    suggestion = firstNameField.getText().toString();
+                    if (!suggestion.equals("")) {
+                        firstname = suggestion;
+                    }
+
+                    suggestion = lastNameField.getText().toString();
+                    if (!suggestion.equals("")) {
+                        lastname = suggestion;
+                    }
+                    mListener.onProfileSaveClicked(username, email, firstname, lastname);
                 }
                 break;
             case (R.id.cancel_button):
@@ -163,7 +177,7 @@ public class EditProfileFragment extends Fragment implements View.OnClickListene
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnEditProfileListener {
-        void onProfileSaveClicked(String username, String email);
+        void onProfileSaveClicked(String username, String email, String firstname, String lastname);
         void onProfileCancelClicked();
     }
 }
