@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
@@ -25,8 +26,11 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,7 +52,9 @@ public class DefaultActivity extends AppCompatActivity
         RestaurantFragment.OnRestaurantInteractionListener,
         DetailedResReviewFragment.OnResReviewInteractionListener,
         DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener,
-        SettingsFragment.OnSettingsInteractionListener {
+        SettingsFragment.OnSettingsInteractionListener,
+        SearchMenuDialogFragment.OnSearchInteractionListener {
+
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -57,7 +63,7 @@ public class DefaultActivity extends AppCompatActivity
 
     private static ArrayList<String> myReviewFilters = new ArrayList<>();
 
-    private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,14 +103,6 @@ public class DefaultActivity extends AppCompatActivity
         mNavigationView.getMenu().getItem(0).setChecked(true);
         ab.setTitle(mNavigationView.getMenu().getItem(0).getTitle());
 
-        // Sets the username in the navigation header
-        View headerView = mNavigationView.getHeaderView(0);
-        TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
-        navUsername.setText(UsernameSingleton.getInstance().getUsername());
-
-        //TODO pull the profile visibility from firebase
-        //UsernameSingleton.getInstance().setVisibility(##FIREBASE VALUE##)
-
         // Creates listener for events when clicking on navigation drawer options.
         mNavigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -119,6 +117,10 @@ public class DefaultActivity extends AppCompatActivity
                             menuItem.setChecked(true);
                             loadPlaces(2);
                             mDrawerLayout.closeDrawers();
+                        } else if (layout.equals("Search for User")) {
+                            SearchMenuDialogFragment searchMenu = SearchMenuDialogFragment.newInstance();
+                            FragmentManager fm = getFragmentManager();
+                            searchMenu.show(fm, "Search for User Menu generated");
                         } else {
                             selectNavOption(layout);
                             // Updates selected item and title, then closes the drawer
@@ -130,7 +132,11 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
-        mAuth = FirebaseAuth.getInstance();
+
+        // Sets the username in the navigation header
+        View headerView = mNavigationView.getHeaderView(0);
+        final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
+        navUsername.setText(mAuth.getCurrentUser().getDisplayName());
 
         /* Manages the BackStack, which alows for back button functionality.
          * Also handles changing the ActionBar title when appropriate. When switching
@@ -163,6 +169,9 @@ public class DefaultActivity extends AppCompatActivity
                 break;
             case R.id.nav_settings:
                 layoutName = "fragment_settings";
+              break;
+            case R.id.nav_user_search:
+                layoutName = "Search for User";
                 break;
             case R.id.nav_wishlist:
                 layoutName = "fragment_wishlist";
@@ -178,6 +187,10 @@ public class DefaultActivity extends AppCompatActivity
     private void selectNavOption(String option) {
         // Create a new fragment and specify the screen to show based on the option selected
         if (option.equals("fragment_profile")) {
+            View headerView = mNavigationView.getHeaderView(0);
+            final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
+            navUsername.setText(mAuth.getCurrentUser().getDisplayName());
+
             Fragment fragment = ProfileFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Profile").commit();
         } else if (option.equals("fragment_edit_profile")) {
@@ -261,10 +274,47 @@ public class DefaultActivity extends AppCompatActivity
     //methods for the edit profile interface
     //returns to the profile screen
     @Override
-    public void onProfileSaveClicked() {
+    public void onProfileSaveClicked(String username, String email, String firstName, String lastName) {
         //TODO make the menuItem be currently selected
-        Log.d("PROFILE EDIT", "Save profile button clicked");
+        final String newEmail = email;
+        final String newUsername = username;
+        FirebaseUser user = mAuth.getCurrentUser();
+        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+
+        if (username != null || email != null || firstName != null || lastName != null) {
+            if (username != null) {
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(username).build();
+                user.updateProfile(profileUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Log.d("PROFILE EDIT", "Username updated");
+                                myRef.child("username").setValue(newUsername);
+                            }
+                        });
+            }
+
+            if (email != null) {
+                user.updateEmail(newEmail).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.d("PROFILE EDIT", "Email updated");
+                        myRef.child("email").setValue(newEmail);
+                    }
+                });
+            }
+
+            if (firstName != null) {
+                myRef.child("firstname").setValue(firstName);
+            }
+
+            if (lastName != null) {
+                myRef.child("lastname").setValue(lastName);
+            }
+        }
         selectNavOption("fragment_profile");
+
     }
 
     //returns to the profile summary screen
@@ -412,8 +462,6 @@ public class DefaultActivity extends AppCompatActivity
     public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem,
                                     int rating, String description, String reviewId) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
-        View headerView = mNavigationView.getHeaderView(0);
-        String username = ((TextView) headerView.findViewById(R.id.navheader_username)).getText().toString();
         final View view = findViewById(R.id.fab);
         if (rating < 1 || rating > 5) {
             Snackbar.make(view, "Rating must be between 1 and 5", Snackbar.LENGTH_LONG)
@@ -464,6 +512,11 @@ public class DefaultActivity extends AppCompatActivity
         } else {
             selectNavOption("restaurant_summary_fragment");
         }
+    }
+
+    @Override
+    public void onSearchButtonClicked() {
+
     }
 
     @Override

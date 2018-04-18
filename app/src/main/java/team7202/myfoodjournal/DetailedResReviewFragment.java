@@ -10,6 +10,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.location.places.Place;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Map;
 
@@ -38,6 +44,7 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_detailed_res_review, container, false);
+
         TextView name = (TextView) view.findViewById(R.id.restuarant_name);
         name.setText(reviewInfo.get("Restaurant Name"));
         TextView menuItem = (TextView) view.findViewById(R.id.menu_item_name);
@@ -46,6 +53,21 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
         rating.setText(reviewInfo.get("Rating"));
         TextView description = (TextView) view.findViewById(R.id.description_value);
         description.setText(reviewInfo.get("Description"));
+
+        final TextView reviewedBy = (TextView) view.findViewById(R.id.username_review);
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(reviewInfo.get("User ID"));
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String username = (String) dataSnapshot.child("username").getValue();
+                reviewedBy.setText("Reviewed by: " + username);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         final DefaultActivity activity = (DefaultActivity) getActivity();
         restaurantName = activity.getRestaurantName();

@@ -105,18 +105,19 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                     Map reviewInfo = (Map) entry.getValue();
                     //check to see if the review should be included
                     if (shouldInclude(reviewInfo, filters)) {
-                        Map<String, String> datum = new HashMap<>(4);
+                        Map<String, String> datum = new HashMap<>();
                         datum.put("Restaurant Name", (String) reviewInfo.get("restaurant_name"));
                         datum.put("Menu Item", (String) reviewInfo.get("menuitem"));
                         datum.put("Description", (String) reviewInfo.get("description"));
                         datum.put("Rating", reviewInfo.get("rating") + "/5");
                         datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
-                        datum.put("UserId", (String) reviewInfo.get("userId"));
+                        datum.put("User ID", (String) reviewInfo.get("userId"));
                         datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                         datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
                         data.add(datum);
                     }
                 }
+                Collections.sort(data, time_comparator);
                 adapter.notifyDataSetChanged();
             }
 
@@ -135,7 +136,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         };
 
         listview.setOnItemClickListener(listListener);
-        Collections.sort(data, time_comparator);
         return view;
     }
 

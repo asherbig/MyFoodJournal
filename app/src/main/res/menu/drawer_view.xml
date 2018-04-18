@@ -9,6 +9,9 @@
             android:id="@+id/nav_restaurants"
             android:title="Restaurant Search" />
         <item
+            android:id="@+id/nav_user_search"
+            android:title="Search for User" />
+        <item
             android:id="@+id/nav_profile"
             android:title="Profile" />
         <item
