@@ -16,6 +16,6 @@ public class UserData {
         this.email = email;
         this.firstname = firstname;
         this.lastname = lastname;
-        this.isPublic = false;
+        this.isPublic = true;
     }
 }
