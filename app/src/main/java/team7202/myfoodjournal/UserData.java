@@ -9,11 +9,13 @@ public class UserData {
     public String email;
     public String firstname;
     public String lastname;
+    public boolean isPublic;
 
     public UserData(String username, String email, String firstname, String lastname) {
         this.username = username;
         this.email = email;
         this.firstname = firstname;
         this.lastname = lastname;
+        this.isPublic = false;
     }
 }

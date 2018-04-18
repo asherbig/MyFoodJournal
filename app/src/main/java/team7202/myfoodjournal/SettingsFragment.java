@@ -12,6 +12,14 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import org.w3c.dom.Text;
 
 
@@ -59,14 +67,26 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         view = inflater.inflate(R.layout.fragment_settings, container, false);
         visibilitySwitch = (Switch) view.findViewById(R.id.visibilitySwitch);
         visibilitySwitch.setOnClickListener(this);
-        visibility = UsernameSingleton.getInstance().getVisibility();
-        visibilitySwitch.setChecked(visibility);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                visibility = Boolean.valueOf((String) dataSnapshot.child("isPublic").getValue());
+                visibilitySwitch.setChecked(visibility);
+                status.setText((visibility)? "Public" : "Private");
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         //set the exit button's click listener to this class
         exitButton = (Button) view.findViewById(R.id.save_button);
         exitButton.setOnClickListener(this);
         //set the text to either public or private based on existing settings
         status = (TextView) view.findViewById((R.id.status));
-        status.setText((visibility)? "Public" : "Private");
         return view;
     }
 

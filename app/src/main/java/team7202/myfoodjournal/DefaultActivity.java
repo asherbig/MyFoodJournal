@@ -566,12 +566,14 @@ public class DefaultActivity extends AppCompatActivity
     public void onSettingSaveButtonClicked(boolean visibility) {
         //TODO Send updated visibility to firebase, update profile
         Log.d("SAVE AND EXIT SETTINGS", "DEFAULT ACTIVITY HANDLING BUTTON CLICK");
-        UsernameSingleton.getInstance().setVisibility(visibility);
-        //return to the last screen on the  stack
-        getFragmentManager().popBackStack();
+        FirebaseUser user = mAuth.getCurrentUser();
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
+        myRef.child("isPublic").setValue(Boolean.toString(visibility));
         //notify the user that their settings were updated
         CharSequence text = "Settings updated!";
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
+        selectNavOption("fragment_myreviews");
+        mNavigationView.getMenu().getItem(0).setChecked(true);
     }
 }
