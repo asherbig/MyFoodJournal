@@ -9,7 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import org.w3c.dom.Text;
 
 
 /**
@@ -26,6 +29,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private View view;
     private boolean visibility;
     private Switch visibilitySwitch;
+    private TextView status;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -54,7 +58,11 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         view = inflater.inflate(R.layout.fragment_settings, container, false);
         visibilitySwitch = (Switch) view.findViewById(R.id.visibilitySwitch);
         visibilitySwitch.setOnClickListener(this);
-        visibilitySwitch.setChecked(UsernameSingleton.getInstance().getVisibility());
+        visibility = UsernameSingleton.getInstance().getVisibility();
+        visibilitySwitch.setChecked(visibility);
+        //set the text to either public or private based on existing settings
+        status = (TextView) view.findViewById((R.id.status));
+        status.setText((visibility)? "Public" : "Private");
         return view;
     }
 
@@ -89,6 +97,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                 break;
             case (R.id.visibilitySwitch):
                 visibility = visibilitySwitch.isChecked();
+                String statusText = (visibility)? "Public" : "Private";
+                status.setText(statusText);
                 break;
         }
     }

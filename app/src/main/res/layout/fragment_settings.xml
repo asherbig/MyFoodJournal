@@ -27,12 +27,28 @@
             <!--android:textSize="20sp"-->
             <!--android:id="@+id/public_text"/>-->
 
-        <Switch
-            android:id="@+id/visibilitySwitch"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textOff="Public"
-            android:textOn="Private"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="15sp"
+            android:layout_marginLeft="10sp">
+
+            <Switch
+                android:id="@+id/visibilitySwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Public"
+                android:textSize="20sp"
+                android:layout_marginLeft="10sp"
+                android:id="@+id/status"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/button_layout"
