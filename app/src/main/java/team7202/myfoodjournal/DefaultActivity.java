@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -51,7 +52,9 @@ public class DefaultActivity extends AppCompatActivity
         RestaurantFragment.OnRestaurantInteractionListener,
         DetailedResReviewFragment.OnResReviewInteractionListener,
         DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener,
+        SettingsFragment.OnSettingsInteractionListener,
         SearchMenuDialogFragment.OnSearchInteractionListener {
+
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
@@ -164,6 +167,9 @@ public class DefaultActivity extends AppCompatActivity
             case R.id.nav_profile:
                 layoutName = "fragment_profile";
                 break;
+            case R.id.nav_settings:
+                layoutName = "fragment_settings";
+              break;
             case R.id.nav_user_search:
                 layoutName = "Search for User";
                 break;
@@ -205,6 +211,9 @@ public class DefaultActivity extends AppCompatActivity
         } else if (option.equals("restaurant_summary_fragment")) {
             Fragment fragment = RestaurantFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Restaurant Reviews").commit();
+        } else if (option.equals("fragment_settings")) {
+            Fragment fragment = SettingsFragment.newInstance();
+            getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Settings").commit();
         } else {
             Fragment fragment = new PageFragment();
             Bundle args = new Bundle();
@@ -551,5 +560,18 @@ public class DefaultActivity extends AppCompatActivity
     public void onEditReviewButtonClicked(Map<String, String> reviewInfo) {
         Fragment fragment = AddReviewFragment.newInstance(reviewInfo, true);
         getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Edit Review").commit();
+    }
+
+    @Override
+    public void onSettingSaveButtonClicked(boolean visibility) {
+        //TODO Send updated visibility to firebase, update profile
+        Log.d("SAVE AND EXIT SETTINGS", "DEFAULT ACTIVITY HANDLING BUTTON CLICK");
+        UsernameSingleton.getInstance().setVisibility(visibility);
+        //return to the last screen on the  stack
+        getFragmentManager().popBackStack();
+        //notify the user that their settings were updated
+        CharSequence text = "Settings updated!";
+        Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+        toast.show();
     }
 }
