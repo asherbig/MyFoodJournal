@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -511,6 +512,13 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onSettingSaveButtonClicked(boolean visibility) {
         //TODO Send updated visibility to firebase, update profile
+        Log.d("SAVE AND EXIT SETTINGS", "DEFAULT ACTIVITY HANDLING BUTTON CLICK");
         UsernameSingleton.getInstance().setVisibility(visibility);
+        //return to the last screen on the  stack
+        getFragmentManager().popBackStack();
+        //notify the user that their settings were updated
+        CharSequence text = "Settings updated!";
+        Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+        toast.show();
     }
 }

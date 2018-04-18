@@ -30,6 +30,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private boolean visibility;
     private Switch visibilitySwitch;
     private TextView status;
+    private Button exitButton;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -60,6 +61,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         visibilitySwitch.setOnClickListener(this);
         visibility = UsernameSingleton.getInstance().getVisibility();
         visibilitySwitch.setChecked(visibility);
+        //set the exit button's click listener to this class
+        exitButton = (Button) view.findViewById(R.id.save_button);
+        exitButton.setOnClickListener(this);
         //set the text to either public or private based on existing settings
         status = (TextView) view.findViewById((R.id.status));
         status.setText((visibility)? "Public" : "Private");
