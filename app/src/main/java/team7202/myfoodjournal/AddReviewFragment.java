@@ -97,7 +97,8 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
             if (editReview) {
                 restaurantNameText.setText(reviewInfo.get("Restaurant Name"));
                 menuitem.setText(reviewInfo.get("Menu Item"));
-                rating.setText(reviewInfo.get("Rating"));
+                char score = reviewInfo.get("Rating").charAt(0);
+                rating.setText(String.valueOf(score));
                 description.setText(reviewInfo.get("Description"));
             } else {
                 restaurantNameText.setText(reviewInfo.get("Restaurant Name"));
