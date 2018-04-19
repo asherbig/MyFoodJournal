@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
@@ -74,8 +75,8 @@ public class SearchResultsFragment extends Fragment {
                         datum.put("User Name", (String) userInfo.get("username"));
                         datum.put("First Name", (String) userInfo.get("firstname"));
                         datum.put("Last Name", (String) userInfo.get("lastname"));
+                        datum.put("Uid", (String) userInfo.get("uid"));
                         data.add(datum);
-                        Log.d("SEARCH RESULTS", "User found");
                     }
                 }
                 adapter.notifyDataSetChanged();
@@ -86,6 +87,16 @@ public class SearchResultsFragment extends Fragment {
 
             }
         });
+        AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
+                Fragment fragment = DetailedUserFragment.newInstance(info);
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(info.get("User Name")).commit();
+            }
+        };
+
+        listview.setOnItemClickListener(listListener);
         return view;
     }
 }

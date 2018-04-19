@@ -35,7 +35,6 @@ import java.util.Map;
 public class AddReviewFragment extends Fragment implements View.OnClickListener {
 
     //parameters
-
     private OnAddReviewListener mListener;
     private View view;
 
@@ -53,12 +52,6 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment ProfileFragment.
-     */
     public static AddReviewFragment newInstance() {
         reviewInfo = null;
         return new AddReviewFragment();

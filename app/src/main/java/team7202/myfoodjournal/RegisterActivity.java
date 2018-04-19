@@ -253,7 +253,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 user.updateProfile(profileUpdates);
 
                                 DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
-                                UserData data = new UserData(username, email, first_name, last_name);
+                                UserData data = new UserData(username, email, first_name, last_name, user.getUid());
                                 userRef.setValue(data);
 
                                 Intent i = new Intent(RegisterActivity.this, DefaultActivity.class);

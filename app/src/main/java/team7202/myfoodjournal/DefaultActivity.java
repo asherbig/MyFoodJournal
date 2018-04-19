@@ -53,7 +53,8 @@ public class DefaultActivity extends AppCompatActivity
         DetailedResReviewFragment.OnResReviewInteractionListener,
         DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener,
         SettingsFragment.OnSettingsInteractionListener,
-        SearchMenuDialogFragment.OnSearchInteractionListener {
+        SearchMenuDialogFragment.OnSearchInteractionListener,
+        DetailedUserFragment.OnDetailedUserInteractionListener {
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
