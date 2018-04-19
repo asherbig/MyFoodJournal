@@ -63,12 +63,16 @@ public class DefaultActivity extends AppCompatActivity
 
     private static ArrayList<String> myReviewFilters = new ArrayList<>();
 
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private static FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private static FirebaseUser user = mAuth.getCurrentUser();
+    private static DatabaseReference myRef = FirebaseDatabase.getInstance().getReference()
+            .child("users").child(user.getUid());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
+
         selectNavOption("fragment_myreviews");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -136,7 +140,7 @@ public class DefaultActivity extends AppCompatActivity
         // Sets the username in the navigation header
         View headerView = mNavigationView.getHeaderView(0);
         final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
-        navUsername.setText(mAuth.getCurrentUser().getDisplayName());
+        navUsername.setText(user.getDisplayName());
 
         /* Manages the BackStack, which alows for back button functionality.
          * Also handles changing the ActionBar title when appropriate. When switching
@@ -189,7 +193,7 @@ public class DefaultActivity extends AppCompatActivity
         if (option.equals("fragment_profile")) {
             View headerView = mNavigationView.getHeaderView(0);
             final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
-            navUsername.setText(mAuth.getCurrentUser().getDisplayName());
+            navUsername.setText(user.getDisplayName());
 
             Fragment fragment = ProfileFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Profile").commit();
@@ -278,8 +282,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         final String newEmail = email;
         final String newUsername = username;
-        FirebaseUser user = mAuth.getCurrentUser();
-        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
 
         if (username != null || email != null || firstName != null || lastName != null) {
             if (username != null) {
@@ -470,11 +472,8 @@ public class DefaultActivity extends AppCompatActivity
         }
 
         String currentTime = "" + (System.currentTimeMillis() / 1000);
-
-        FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-        final DatabaseReference myRef = root.child("my_reviews").child(user.getUid());
-        final DatabaseReference restaurantRef = root.child("restaurants").child(restaurant_id);
+        final DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference()
+                .child("restaurants").child(restaurant_id);
 
         if (reviewId.equals("")) {
             final String key = myRef.push().getKey();
@@ -515,7 +514,31 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSearchButtonClicked() {
+    public void onSearchButtonClicked(String text) {
+        Fragment fragment = SearchResultsFragment.newInstance(text);
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("User Search Results").commit();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users");
+        final ArrayList<String> results = new ArrayList<>();
+        userRef.orderByChild("username").equalTo(text).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot entry : dataSnapshot.getChildren()) {
+                    Map userInfo = (Map) entry.getValue();
+                    boolean isPublic = (boolean) userInfo.get("isPublic");
+
+                    if (isPublic) {
+                        results.add((String) dataSnapshot.child("username").getValue());
+                        Log.d("SEARCH RESULTS", "User found");
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
     }
 
@@ -527,7 +550,6 @@ public class DefaultActivity extends AppCompatActivity
         final String nameString = reviewInfo.get("Restaurant Name");
         final String menuitem = reviewInfo.get("Menu Item");
 
-        FirebaseUser user = mAuth.getCurrentUser();
         final DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
 
         if (wishlistRef != null) {
@@ -566,9 +588,8 @@ public class DefaultActivity extends AppCompatActivity
     public void onSettingSaveButtonClicked(boolean visibility) {
         //TODO Send updated visibility to firebase, update profile
         Log.d("SAVE AND EXIT SETTINGS", "DEFAULT ACTIVITY HANDLING BUTTON CLICK");
-        FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
-        myRef.child("isPublic").setValue(Boolean.toString(visibility));
+
+        myRef.child("isPublic").setValue(visibility);
         //notify the user that their settings were updated
         CharSequence text = "Settings updated!";
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);

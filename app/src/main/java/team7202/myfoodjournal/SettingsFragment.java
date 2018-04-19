@@ -73,7 +73,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                visibility = Boolean.valueOf((String) dataSnapshot.child("isPublic").getValue());
+                visibility = (Boolean) dataSnapshot.child("isPublic").getValue();
                 visibilitySwitch.setChecked(visibility);
                 status.setText((visibility)? "Public" : "Private");
             }

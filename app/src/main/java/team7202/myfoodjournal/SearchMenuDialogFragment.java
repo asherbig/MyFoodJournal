@@ -89,7 +89,8 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
             // which should swap the fragment to go to the right fragment
             case (R.id.search_users_button):
                 if (mListener != null) {
-                    mListener.onSearchButtonClicked();
+                    String text = mRestaurantSearch.getQuery().toString();
+                    mListener.onSearchButtonClicked(text);
                 }
                 dismiss();
                 break;
@@ -112,6 +113,6 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
      */
     public interface OnSearchInteractionListener {
         // TODO: Update argument type and name
-        void onSearchButtonClicked();
+        void onSearchButtonClicked(String text);
     }
 }
