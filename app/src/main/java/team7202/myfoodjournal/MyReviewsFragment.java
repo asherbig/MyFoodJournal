@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -47,6 +48,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
     private static SimpleAdapter adapter;
     private static ArrayList<String> filters;
     private static DataSnapshot lastDataReceived;
+    private NavigationView mNavigationView;
     public MyReviewsFragment() {
         // Required empty public constructor
     }
@@ -67,6 +69,8 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
         if (getArguments() != null) {
             menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
         }
+        mNavigationView = (NavigationView) this.getActivity().findViewById(R.id.navigation);
+        mNavigationView.setCheckedItem(R.id.nav_myreviews);
     }
 
     @Override

@@ -3,6 +3,7 @@ package team7202.myfoodjournal;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ public class DetailedMyReviewFragment extends Fragment implements View.OnClickLi
         rating.setText(reviewInfo.get("Rating"));
         TextView description = (TextView) view.findViewById(R.id.description_value);
         description.setText(reviewInfo.get("Description"));
+        description.setMovementMethod(new ScrollingMovementMethod());
 
         Button editReviewButton = (Button) view.findViewById(R.id.edit_review_button);
         editReviewButton.setOnClickListener(this);

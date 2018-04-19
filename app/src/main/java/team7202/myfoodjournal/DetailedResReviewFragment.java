@@ -3,6 +3,7 @@ package team7202.myfoodjournal;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
         rating.setText(reviewInfo.get("Rating"));
         TextView description = (TextView) view.findViewById(R.id.description_value);
         description.setText(reviewInfo.get("Description"));
+        description.setMovementMethod(new ScrollingMovementMethod());
 
         final TextView reviewedBy = (TextView) view.findViewById(R.id.username_review);
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(reviewInfo.get("User ID"));

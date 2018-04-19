@@ -104,7 +104,6 @@ public class DefaultActivity extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.navigation);
 
         // Sets the Home page menu option as selected by default.
-        mNavigationView.getMenu().getItem(0).setChecked(true);
         ab.setTitle(mNavigationView.getMenu().getItem(0).getTitle());
 
         // Creates listener for events when clicking on navigation drawer options.
@@ -150,10 +149,12 @@ public class DefaultActivity extends AppCompatActivity
                 new FragmentManager.OnBackStackChangedListener() {
                     @Override
                     public void onBackStackChanged() {
-                        String newTitle = getFragmentManager().getBackStackEntryAt(getFragmentManager().getBackStackEntryCount() - 1).getName();
-                        if (newTitle != null) {
+                        int prevIndex = getFragmentManager().getBackStackEntryCount() - 1;
+                        if (prevIndex >= 0) {
+                            String newTitle = getFragmentManager().getBackStackEntryAt(prevIndex).getName();
                             ab.setTitle(newTitle);
                         }
+                        adjustCurrentDrawerOption();
                     }
                 }
         );
@@ -452,7 +453,27 @@ public class DefaultActivity extends AppCompatActivity
                 final View view = findViewById(R.id.fab);
                 Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                adjustCurrentDrawerOption();
             }
+        } else {
+            adjustCurrentDrawerOption();
+        }
+    }
+
+    public void adjustCurrentDrawerOption() {
+        Fragment current = getFragmentManager().findFragmentById(R.id.content_frame);
+        if (current instanceof MyReviewsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_myreviews);
+        } else if (current instanceof RestaurantFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_restaurants);
+        } else if (current instanceof SearchResultsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_user_search);
+        } else if (current instanceof ProfileFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_profile);
+        } else if (current instanceof WishlistFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_wishlist);
+        } else if (current instanceof SettingsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_settings);
         }
     }
 
@@ -472,19 +493,21 @@ public class DefaultActivity extends AppCompatActivity
         }
 
         String currentTime = "" + (System.currentTimeMillis() / 1000);
+        final DatabaseReference myReviewRef = FirebaseDatabase.getInstance().getReference()
+                .child("my_reviews").child(user.getUid());
         final DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference()
                 .child("restaurants").child(restaurant_id);
 
         if (reviewId.equals("")) {
-            final String key = myRef.push().getKey();
+            final String key = myReviewRef.push().getKey();
             ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_id,
                     restaurant_name, menuitem, rating, description, currentTime);
-            myRef.child(key).setValue(reviewData);
+            myReviewRef.child(key).setValue(reviewData);
             restaurantRef.child(key).setValue(reviewData);
         } else {
             ReviewData reviewData = new ReviewData(reviewId, user.getUid(), restaurant_id,
                     restaurant_name, menuitem, rating, description, currentTime);
-            myRef.child(reviewId).setValue(reviewData);
+            myReviewRef.child(reviewId).setValue(reviewData);
             restaurantRef.child(reviewId).setValue(reviewData);
         }
         selectNavOption("fragment_myreviews");
@@ -517,29 +540,13 @@ public class DefaultActivity extends AppCompatActivity
     public void onSearchButtonClicked(String text) {
         Fragment fragment = SearchResultsFragment.newInstance(text);
         getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("User Search Results").commit();
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users");
-        final ArrayList<String> results = new ArrayList<>();
-        userRef.orderByChild("username").equalTo(text).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot entry : dataSnapshot.getChildren()) {
-                    Map userInfo = (Map) entry.getValue();
-                    boolean isPublic = (boolean) userInfo.get("isPublic");
+        mDrawerLayout.closeDrawers();
+    }
 
-                    if (isPublic) {
-                        results.add((String) dataSnapshot.child("username").getValue());
-                        Log.d("SEARCH RESULTS", "User found");
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
+    @Override
+    public void onSearchCancelClicked() {
+        adjustCurrentDrawerOption();
+        mDrawerLayout.closeDrawers();
     }
 
     @Override
@@ -595,6 +602,5 @@ public class DefaultActivity extends AppCompatActivity
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
         selectNavOption("fragment_myreviews");
-        mNavigationView.getMenu().getItem(0).setChecked(true);
     }
 }

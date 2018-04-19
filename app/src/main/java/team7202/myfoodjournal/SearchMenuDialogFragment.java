@@ -91,12 +91,15 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
                 if (mListener != null) {
                     String text = mRestaurantSearch.getQuery().toString();
                     mListener.onSearchButtonClicked(text);
+                    dismiss();
                 }
-                dismiss();
                 break;
 
             case (R.id.closeSearchMenu):
-                dismiss();
+                if (mListener != null) {
+                    mListener.onSearchCancelClicked();
+                    dismiss();
+                }
                 break;
         }
     }
@@ -114,5 +117,6 @@ public class SearchMenuDialogFragment extends DialogFragment implements View.OnC
     public interface OnSearchInteractionListener {
         // TODO: Update argument type and name
         void onSearchButtonClicked(String text);
+        void onSearchCancelClicked();
     }
 }
