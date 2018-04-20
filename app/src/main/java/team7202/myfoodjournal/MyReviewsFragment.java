@@ -40,8 +40,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
     private static final String ARG_MENU_OPTION = "menu_option";
 
     //parameters
-    private String menuOptionParam;
-
     private MyReviewsFragment.OnMyReviewsInteractionListener mListener;
     private View view;
     private static List<Map<String, String>> data;
@@ -66,9 +64,6 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
-        }
         mNavigationView = (NavigationView) this.getActivity().findViewById(R.id.navigation);
         mNavigationView.setCheckedItem(R.id.nav_myreviews);
     }

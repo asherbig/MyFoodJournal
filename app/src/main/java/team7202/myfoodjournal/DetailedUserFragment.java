@@ -12,6 +12,8 @@ import android.widget.SimpleAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,6 +36,7 @@ public class DetailedUserFragment extends Fragment implements View.OnClickListen
     private static TextView status;
     private static List<Map<String, String>> data;
     private static SimpleAdapter adapter;
+    private static DatabaseReference followRef;
 
     private DetailedUserFragment.OnDetailedUserInteractionListener mListener;
     public static DetailedUserFragment newInstance(Map info) {
@@ -51,15 +54,38 @@ public class DetailedUserFragment extends Fragment implements View.OnClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_detailed_user, container, false);
+        TextView usernameField = (TextView) view.findViewById(R.id.username_text);
+        usernameField.setText(userInfo.get("User Name"));
+
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        final String uid = userInfo.get("Uid");
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("my_reviews").child(uid);
+        followRef = FirebaseDatabase.getInstance().getReference()
+                .child("followers").child(uid);
+
         followingSwitch = (Switch) view.findViewById(R.id.followingSwitch);
         followingSwitch.setOnClickListener(this);
         status = (TextView) view.findViewById(R.id.status);
 
-        TextView usernameField = (TextView) view.findViewById(R.id.username_text);
-        usernameField.setText(userInfo.get("User Name"));
+        followRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(currentUser.getUid())) {
+                    followingSwitch.setChecked(true);
+                    status.setText("Yes");
+                } else {
+                    followingSwitch.setChecked(false);
+                    status.setText("No");
+                }
+            }
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
-                .child("my_reviews").child(userInfo.get("Uid"));
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
         ListView listview = (ListView) view.findViewById(R.id.listview_user_reviews);
         data = new ArrayList<>();
@@ -134,9 +160,31 @@ public class DetailedUserFragment extends Fragment implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
+        final String currentId = FirebaseAuth.getInstance().getUid();
+
         switch(v.getId()) {
             case(R.id.followingSwitch):
                 isFollowing = followingSwitch.isChecked();
+                if (isFollowing) {
+                    followRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            long count = dataSnapshot.getChildrenCount();
+                            Map<String, Object> newFollower = new HashMap<>();
+                            newFollower.put(currentId, String.valueOf(count));
+
+                            followRef.updateChildren(newFollower);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                } else {
+                    followRef.child(currentId).removeValue();
+                }
+
                 String statusText = (isFollowing)? "Yes" : "No";
                 status.setText(statusText);
                 break;
