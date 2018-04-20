@@ -45,17 +45,6 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_detailed_res_review, container, false);
-
-        TextView name = (TextView) view.findViewById(R.id.restuarant_name);
-        name.setText(reviewInfo.get("Restaurant Name"));
-        TextView menuItem = (TextView) view.findViewById(R.id.menu_item_name);
-        menuItem.setText(reviewInfo.get("Menu Item"));
-        TextView rating = (TextView) view.findViewById(R.id.rating_value);
-        rating.setText(reviewInfo.get("Rating"));
-        TextView description = (TextView) view.findViewById(R.id.description_value);
-        description.setText(reviewInfo.get("Description"));
-        description.setMovementMethod(new ScrollingMovementMethod());
-
         final TextView reviewedBy = (TextView) view.findViewById(R.id.username_review);
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(reviewInfo.get("User ID"));
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -70,6 +59,16 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
 
             }
         });
+
+        TextView name = (TextView) view.findViewById(R.id.restuarant_name);
+        name.setText(reviewInfo.get("Restaurant Name"));
+        TextView menuItem = (TextView) view.findViewById(R.id.menu_item_name);
+        menuItem.setText(reviewInfo.get("Menu Item"));
+        TextView rating = (TextView) view.findViewById(R.id.rating_value);
+        rating.setText(reviewInfo.get("Rating"));
+        TextView description = (TextView) view.findViewById(R.id.description_value);
+        description.setText(reviewInfo.get("Description"));
+        description.setMovementMethod(new ScrollingMovementMethod());
 
         final DefaultActivity activity = (DefaultActivity) getActivity();
         restaurantName = activity.getRestaurantName();
@@ -111,7 +110,7 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
                 break;
             case (R.id.cancel_button):
                 if (mListener != null) {
-                    mListener.onCancelButtonClicked(false);
+                    mListener.onCancelButtonClicked();
                 }
                 break;
         }
@@ -120,6 +119,6 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
     public interface OnResReviewInteractionListener {
         // TODO: Update argument type and name
         void onAddWishlistButtonClicked(Map<String, String> reviewInfo);
-        void onCancelButtonClicked(boolean inMyReviews);
+        void onCancelButtonClicked();
     }
 }

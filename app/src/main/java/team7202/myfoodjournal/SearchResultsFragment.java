@@ -62,7 +62,8 @@ public class SearchResultsFragment extends Fragment {
                 new int[] {R.id.username_text, R.id.firstname_text, R.id.lastname_text});
         listview.setAdapter(adapter);
 
-        userRef.orderByChild("username").equalTo(query).addValueEventListener(new ValueEventListener() {
+        userRef.orderByChild("username").startAt(query).endAt(query + "\uf8ff")
+                .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 data.clear();

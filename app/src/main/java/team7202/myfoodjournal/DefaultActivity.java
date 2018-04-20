@@ -484,7 +484,7 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem,
-                                    int rating, String description, String reviewId) {
+                                    int rating, String description, String reviewId, String address) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
         final View view = findViewById(R.id.fab);
         if (rating < 1 || rating > 5) {
@@ -502,21 +502,15 @@ public class DefaultActivity extends AppCompatActivity
         if (reviewId.equals("")) {
             final String key = myReviewRef.push().getKey();
             ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_id,
-                    restaurant_name, menuitem, rating, description, currentTime);
+                    restaurant_name, menuitem, rating, description, currentTime, address);
             myReviewRef.child(key).setValue(reviewData);
             restaurantRef.child(key).setValue(reviewData);
         } else {
             ReviewData reviewData = new ReviewData(reviewId, user.getUid(), restaurant_id,
-                    restaurant_name, menuitem, rating, description, currentTime);
+                    restaurant_name, menuitem, rating, description, currentTime, address);
             myReviewRef.child(reviewId).setValue(reviewData);
             restaurantRef.child(reviewId).setValue(reviewData);
         }
-        selectNavOption("fragment_myreviews");
-    }
-
-    @Override
-    public void onAddReviewCancelClicked() {
-        Log.d("CANCEL REVIEW", "Canceled review written by user.");
         selectNavOption("fragment_myreviews");
     }
 
@@ -528,13 +522,9 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCancelButtonClicked(boolean inMyReviews) {
+    public void onCancelButtonClicked() {
         Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
-        if (inMyReviews) {
-            selectNavOption("fragment_myreviews");
-        } else {
-            selectNavOption("restaurant_summary_fragment");
-        }
+        getFragmentManager().popBackStackImmediate();
     }
 
     @Override
@@ -557,6 +547,8 @@ public class DefaultActivity extends AppCompatActivity
         final String reviewId = reviewInfo.get("Review ID");
         final String nameString = reviewInfo.get("Restaurant Name");
         final String menuitem = reviewInfo.get("Menu Item");
+        final String restaurantId = reviewInfo.get("Restaurant ID");
+        final String address = reviewInfo.get("Address");
 
         final DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
 
@@ -570,7 +562,7 @@ public class DefaultActivity extends AppCompatActivity
                                 .setAction("Action", null).show();
                     } else {
                         WishlistData entryData = new WishlistData(reviewId, nameString,
-                                restaurantName.getId(), (String) restaurantName.getAddress(), menuitem, currentTime);
+                                restaurantId, address, menuitem, currentTime);
                         wishlistRef.child(reviewId).setValue(entryData);
                         final View view = findViewById(R.id.fragment_title);
                         Snackbar.make(view, "Successfully added item to wishlist", Snackbar.LENGTH_LONG)

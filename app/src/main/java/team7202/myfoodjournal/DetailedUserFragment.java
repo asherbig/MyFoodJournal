@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Switch;
@@ -88,6 +89,7 @@ public class DetailedUserFragment extends Fragment implements View.OnClickListen
                         datum.put("User ID", (String) reviewInfo.get("userId"));
                         datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                         datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
+                        datum.put("Address", (String) reviewInfo.get("address"));
                         data.add(datum);
                     //}
                 }
@@ -100,7 +102,16 @@ public class DetailedUserFragment extends Fragment implements View.OnClickListen
 
             }
         });
-
+        AdapterView.OnItemClickListener listListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
+                Fragment fragment = DetailedResReviewFragment.newInstance(info);
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment)
+                        .addToBackStack(userInfo.get("User Name") + "'s Reviews").commit();
+            }
+        };
+        listview.setOnItemClickListener(listListener);
         return view;
     }
 

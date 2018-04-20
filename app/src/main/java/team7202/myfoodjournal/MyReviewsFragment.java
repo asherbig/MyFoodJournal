@@ -118,6 +118,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                         datum.put("User ID", (String) reviewInfo.get("userId"));
                         datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                         datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
+                        datum.put("Address", (String) reviewInfo.get("address"));
                         data.add(datum);
                     }
                 }
@@ -134,7 +135,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
-                Fragment fragment = DetailedMyReviewFragment.newInstance(info, true);
+                Fragment fragment = DetailedMyReviewFragment.newInstance(info);
                 getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
             }
         };

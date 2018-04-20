@@ -158,7 +158,8 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
                                     reviewInfo.get("Restaurant Name"),
                                     reviewInfo.get("Menu Item"),
                                     Integer.valueOf(rating.getText().toString()),
-                                    description.getText().toString(), "");
+                                    description.getText().toString(), "",
+                                    reviewInfo.get("Address"));
                         } catch (Exception e) {
                             Log.d("BIG EXCEPTION", e.getMessage());
                             Snackbar.make(view, INCOMPLETE_FIELDS, Snackbar.LENGTH_LONG)
@@ -172,7 +173,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
                                     menuitem.getText().toString(),
                                     Integer.valueOf(rating.getText().toString()),
                                     description.getText().toString(),
-                                    reviewInfo.get("Review ID"));
+                                    reviewInfo.get("Review ID"), reviewInfo.get("Address"));
                         } catch (Exception e) {
                             Log.d("BIG EXCEPTION", Log.getStackTraceString(e));
                             Snackbar.make(view, INCOMPLETE_FIELDS, Snackbar.LENGTH_LONG)
@@ -185,7 +186,8 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
                                     restaurantName.getName().toString(),
                                     menuitem.getText().toString(),
                                     Integer.valueOf(rating.getText().toString()),
-                                    description.getText().toString(), "");
+                                    description.getText().toString(), "",
+                                    restaurantName.getAddress().toString());
                         } catch (Exception e) {
                             Log.d("BIG EXCEPTION", e.getMessage());
                             Snackbar.make(view, INCOMPLETE_FIELDS, Snackbar.LENGTH_LONG)
@@ -196,7 +198,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
                 break;
             case (R.id.cancel_button):
                 if (mListener != null) {
-                    mListener.onAddReviewCancelClicked();
+                    mListener.onCancelButtonClicked();
                 }
                 break;
         }
@@ -210,7 +212,7 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
      */
     public interface OnAddReviewListener {
         void onSaveReviewClicked(String id, String name, String menuitem, int rating,
-                                 String description, String reviewId);
-        void onAddReviewCancelClicked();
+                                 String description, String reviewId, String address);
+        void onCancelButtonClicked();
     }
 }
