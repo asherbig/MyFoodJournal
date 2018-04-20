@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,14 +40,13 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
     private static final String ARG_MENU_OPTION = "menu_option";
 
     //parameters
-    private String menuOptionParam;
-
     private MyReviewsFragment.OnMyReviewsInteractionListener mListener;
     private View view;
     private static List<Map<String, String>> data;
     private static SimpleAdapter adapter;
     private static ArrayList<String> filters;
     private static DataSnapshot lastDataReceived;
+    private NavigationView mNavigationView;
     public MyReviewsFragment() {
         // Required empty public constructor
     }
@@ -64,9 +64,8 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
-        }
+        mNavigationView = (NavigationView) this.getActivity().findViewById(R.id.navigation);
+        mNavigationView.setCheckedItem(R.id.nav_myreviews);
     }
 
     @Override
@@ -114,6 +113,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                         datum.put("User ID", (String) reviewInfo.get("userId"));
                         datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                         datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
+                        datum.put("Address", (String) reviewInfo.get("address"));
                         data.add(datum);
                     }
                 }
@@ -130,7 +130,7 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
-                Fragment fragment = DetailedMyReviewFragment.newInstance(info, true);
+                Fragment fragment = DetailedMyReviewFragment.newInstance(info);
                 getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
             }
         };

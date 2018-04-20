@@ -187,7 +187,8 @@ public class WishlistFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void onClick(View view) {
                     Fragment fragment = AddReviewFragment.newInstance(entry, false);
-                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment)
+                            .addToBackStack("Add Review").commit();
                     Log.d("TEST", "Successfully registered onClick in ListView entry.");
                 }
             });

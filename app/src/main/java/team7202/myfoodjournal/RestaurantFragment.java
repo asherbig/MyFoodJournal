@@ -103,6 +103,7 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                     datum.put("User ID", (String) reviewInfo.get("userId"));
                     datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                     datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
+                    datum.put("Address", (String) reviewInfo.get("address"));
                     data.add(datum);
                 }
                 Collections.sort(data, time_comparator);
@@ -121,7 +122,7 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
                 Map<String, String> info = (Map<String, String>) adapterView.getItemAtPosition(position);
                 Fragment fragment;
                 if (info.get("User ID").equals(user.getUid())) {
-                    fragment = DetailedMyReviewFragment.newInstance(info, false);
+                    fragment = DetailedMyReviewFragment.newInstance(info);
                 } else {
                     fragment = DetailedResReviewFragment.newInstance(info);
                 }
@@ -246,6 +247,5 @@ public class RestaurantFragment extends Fragment implements View.OnClickListener
     public interface OnRestaurantInteractionListener {
         // TODO: Update argument type and name
         void onSearchBarClicked();
-        void onSortByButtonClicked();
     }
 }

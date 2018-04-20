@@ -53,7 +53,8 @@ public class DefaultActivity extends AppCompatActivity
         DetailedResReviewFragment.OnResReviewInteractionListener,
         DetailedMyReviewFragment.OnMyDetailedReviewInteractionListener,
         SettingsFragment.OnSettingsInteractionListener,
-        SearchMenuDialogFragment.OnSearchInteractionListener {
+        SearchMenuDialogFragment.OnSearchInteractionListener,
+        DetailedUserFragment.OnDetailedUserInteractionListener {
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -63,12 +64,16 @@ public class DefaultActivity extends AppCompatActivity
 
     private static ArrayList<String> myReviewFilters = new ArrayList<>();
 
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private static FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private static FirebaseUser user = mAuth.getCurrentUser();
+    private static DatabaseReference myRef = FirebaseDatabase.getInstance().getReference()
+            .child("users").child(user.getUid());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
+
         selectNavOption("fragment_myreviews");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -100,7 +105,6 @@ public class DefaultActivity extends AppCompatActivity
         mNavigationView = (NavigationView) findViewById(R.id.navigation);
 
         // Sets the Home page menu option as selected by default.
-        mNavigationView.getMenu().getItem(0).setChecked(true);
         ab.setTitle(mNavigationView.getMenu().getItem(0).getTitle());
 
         // Creates listener for events when clicking on navigation drawer options.
@@ -136,7 +140,7 @@ public class DefaultActivity extends AppCompatActivity
         // Sets the username in the navigation header
         View headerView = mNavigationView.getHeaderView(0);
         final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
-        navUsername.setText(mAuth.getCurrentUser().getDisplayName());
+        navUsername.setText(user.getDisplayName());
 
         /* Manages the BackStack, which alows for back button functionality.
          * Also handles changing the ActionBar title when appropriate. When switching
@@ -146,10 +150,12 @@ public class DefaultActivity extends AppCompatActivity
                 new FragmentManager.OnBackStackChangedListener() {
                     @Override
                     public void onBackStackChanged() {
-                        String newTitle = getFragmentManager().getBackStackEntryAt(getFragmentManager().getBackStackEntryCount() - 1).getName();
-                        if (newTitle != null) {
+                        int prevIndex = getFragmentManager().getBackStackEntryCount() - 1;
+                        if (prevIndex >= 0) {
+                            String newTitle = getFragmentManager().getBackStackEntryAt(prevIndex).getName();
                             ab.setTitle(newTitle);
                         }
+                        adjustCurrentDrawerOption();
                     }
                 }
         );
@@ -189,7 +195,7 @@ public class DefaultActivity extends AppCompatActivity
         if (option.equals("fragment_profile")) {
             View headerView = mNavigationView.getHeaderView(0);
             final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
-            navUsername.setText(mAuth.getCurrentUser().getDisplayName());
+            navUsername.setText(user.getDisplayName());
 
             Fragment fragment = ProfileFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("Profile").commit();
@@ -278,8 +284,6 @@ public class DefaultActivity extends AppCompatActivity
         //TODO make the menuItem be currently selected
         final String newEmail = email;
         final String newUsername = username;
-        FirebaseUser user = mAuth.getCurrentUser();
-        final DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
 
         if (username != null || email != null || firstName != null || lastName != null) {
             if (username != null) {
@@ -450,7 +454,27 @@ public class DefaultActivity extends AppCompatActivity
                 final View view = findViewById(R.id.fab);
                 Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                adjustCurrentDrawerOption();
             }
+        } else {
+            adjustCurrentDrawerOption();
+        }
+    }
+
+    public void adjustCurrentDrawerOption() {
+        Fragment current = getFragmentManager().findFragmentById(R.id.content_frame);
+        if (current instanceof MyReviewsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_myreviews);
+        } else if (current instanceof RestaurantFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_restaurants);
+        } else if (current instanceof SearchResultsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_user_search);
+        } else if (current instanceof ProfileFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_profile);
+        } else if (current instanceof WishlistFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_wishlist);
+        } else if (current instanceof SettingsFragment) {
+            mNavigationView.setCheckedItem(R.id.nav_settings);
         }
     }
 
@@ -460,7 +484,7 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     public void onSaveReviewClicked(String restaurant_id, String restaurant_name, String menuitem,
-                                    int rating, String description, String reviewId) {
+                                    int rating, String description, String reviewId, String address) {
         Log.d("SAVE REVIEW", "Saved review written by user.");
         final View view = findViewById(R.id.fab);
         if (rating < 1 || rating > 5) {
@@ -470,30 +494,23 @@ public class DefaultActivity extends AppCompatActivity
         }
 
         String currentTime = "" + (System.currentTimeMillis() / 1000);
-
-        FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
-        final DatabaseReference myRef = root.child("my_reviews").child(user.getUid());
-        final DatabaseReference restaurantRef = root.child("restaurants").child(restaurant_id);
+        final DatabaseReference myReviewRef = FirebaseDatabase.getInstance().getReference()
+                .child("my_reviews").child(user.getUid());
+        final DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference()
+                .child("restaurants").child(restaurant_id);
 
         if (reviewId.equals("")) {
-            final String key = myRef.push().getKey();
+            final String key = myReviewRef.push().getKey();
             ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_id,
-                    restaurant_name, menuitem, rating, description, currentTime);
-            myRef.child(key).setValue(reviewData);
+                    restaurant_name, menuitem, rating, description, currentTime, address);
+            myReviewRef.child(key).setValue(reviewData);
             restaurantRef.child(key).setValue(reviewData);
         } else {
             ReviewData reviewData = new ReviewData(reviewId, user.getUid(), restaurant_id,
-                    restaurant_name, menuitem, rating, description, currentTime);
-            myRef.child(reviewId).setValue(reviewData);
+                    restaurant_name, menuitem, rating, description, currentTime, address);
+            myReviewRef.child(reviewId).setValue(reviewData);
             restaurantRef.child(reviewId).setValue(reviewData);
         }
-        selectNavOption("fragment_myreviews");
-    }
-
-    @Override
-    public void onAddReviewCancelClicked() {
-        Log.d("CANCEL REVIEW", "Canceled review written by user.");
         selectNavOption("fragment_myreviews");
     }
 
@@ -505,18 +522,22 @@ public class DefaultActivity extends AppCompatActivity
     }
 
     @Override
-    public void onCancelButtonClicked(boolean inMyReviews) {
+    public void onCancelButtonClicked() {
         Log.d("CANCEL BUTTON CLICKED", "Cancel button clicked by user.");
-        if (inMyReviews) {
-            selectNavOption("fragment_myreviews");
-        } else {
-            selectNavOption("restaurant_summary_fragment");
-        }
+        getFragmentManager().popBackStackImmediate();
     }
 
     @Override
-    public void onSearchButtonClicked() {
+    public void onSearchButtonClicked(String text) {
+        Fragment fragment = SearchResultsFragment.newInstance(text);
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("User Search Results").commit();
+        mDrawerLayout.closeDrawers();
+    }
 
+    @Override
+    public void onSearchCancelClicked() {
+        adjustCurrentDrawerOption();
+        mDrawerLayout.closeDrawers();
     }
 
     @Override
@@ -526,8 +547,9 @@ public class DefaultActivity extends AppCompatActivity
         final String reviewId = reviewInfo.get("Review ID");
         final String nameString = reviewInfo.get("Restaurant Name");
         final String menuitem = reviewInfo.get("Menu Item");
+        final String restaurantId = reviewInfo.get("Restaurant ID");
+        final String address = reviewInfo.get("Address");
 
-        FirebaseUser user = mAuth.getCurrentUser();
         final DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference().child("wishlist").child(user.getUid());
 
         if (wishlistRef != null) {
@@ -540,7 +562,7 @@ public class DefaultActivity extends AppCompatActivity
                                 .setAction("Action", null).show();
                     } else {
                         WishlistData entryData = new WishlistData(reviewId, nameString,
-                                restaurantName.getId(), (String) restaurantName.getAddress(), menuitem, currentTime);
+                                restaurantId, address, menuitem, currentTime);
                         wishlistRef.child(reviewId).setValue(entryData);
                         final View view = findViewById(R.id.fragment_title);
                         Snackbar.make(view, "Successfully added item to wishlist", Snackbar.LENGTH_LONG)
@@ -566,14 +588,12 @@ public class DefaultActivity extends AppCompatActivity
     public void onSettingSaveButtonClicked(boolean visibility) {
         //TODO Send updated visibility to firebase, update profile
         Log.d("SAVE AND EXIT SETTINGS", "DEFAULT ACTIVITY HANDLING BUTTON CLICK");
-        FirebaseUser user = mAuth.getCurrentUser();
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
-        myRef.child("isPublic").setValue(Boolean.toString(visibility));
+
+        myRef.child("isPublic").setValue(visibility);
         //notify the user that their settings were updated
         CharSequence text = "Settings updated!";
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
         selectNavOption("fragment_myreviews");
-        mNavigationView.getMenu().getItem(0).setChecked(true);
     }
 }
