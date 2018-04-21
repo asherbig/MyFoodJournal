@@ -2,9 +2,14 @@ package team7202.myfoodjournal;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -17,16 +22,22 @@ import android.util.Log;
 import android.view.View;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,10 +47,18 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class DefaultActivity extends AppCompatActivity
         implements ProfileFragment.OnProfileInteractionListener,
@@ -68,6 +87,9 @@ public class DefaultActivity extends AppCompatActivity
     private static FirebaseUser user = mAuth.getCurrentUser();
     private static DatabaseReference myRef = FirebaseDatabase.getInstance().getReference()
             .child("users").child(user.getUid());
+
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +163,19 @@ public class DefaultActivity extends AppCompatActivity
         View headerView = mNavigationView.getHeaderView(0);
         final TextView navUsername = (TextView) headerView.findViewById(R.id.navheader_username);
         navUsername.setText(user.getDisplayName());
+
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+        //display profile picture
+        final ImageView imgView = (ImageView)headerView.findViewById(R.id.imgView);
+
+        Glide.with(this)
+                .using(new FirebaseImageLoader())
+                .load(storage.getReferenceFromUrl("gs://myfoodjournal-ad03b.appspot.com/images/" + user.getUid() + "/profile_picture"))
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .into(imgView);
 
         /* Manages the BackStack, which alows for back button functionality.
          * Also handles changing the ActionBar title when appropriate. When switching
@@ -274,7 +309,17 @@ public class DefaultActivity extends AppCompatActivity
     @Override
     public void onChangePassClicked() {
         Log.d("PROFILE", "Change password clicked");
+
         selectNavOption("fragment_edit_password");
+    }
+
+    //edit profile picture
+    @Override
+    public void onEditProfilePictureClicked() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), 10);
     }
 
     //methods for the edit profile interface
@@ -428,36 +473,99 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            Place place = PlaceAutocomplete.getPlace(this, data);
+        if (requestCode == 10 & resultCode == RESULT_OK && data != null && data.getData() != null) {
+            final Uri filePath = data.getData();
 
-            boolean isTaggedRestaurant = false;
-            List<Integer> placeTypes = place.getPlaceTypes();
-            for (int i = 0; i < placeTypes.size(); i++) {
-                if (placeTypes.get(i) == Place.TYPE_RESTAURANT) {
-                    isTaggedRestaurant = true;
-                    break;
-                }
-            }
+            if(filePath != null)
+            {
+                //delete previous profile picture
+                StorageReference profilePictureRef = storage.getReferenceFromUrl("gs://myfoodjournal-ad03b.appspot.com/images/" + user.getUid() + "/profile_picture");
 
-            if (isTaggedRestaurant) {
-                restaurantName = place;
-                switch (requestCode) {
-                    case (1):
-                        selectNavOption("fragment_add_review");
-                        break;
-                    case (2):
-                        selectNavOption("restaurant_summary_fragment");
-                        break;
-                }
-            } else {
-                final View view = findViewById(R.id.fab);
-                Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                adjustCurrentDrawerOption();
+                profilePictureRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // File deleted successfully
+                        final ProgressDialog progressDialog = new ProgressDialog(DefaultActivity.this);
+                        progressDialog.setTitle("Uploading...");
+                        progressDialog.show();
+
+                        View headerView = mNavigationView.getHeaderView(0);
+                        final ImageView imgView = (ImageView)headerView.findViewById(R.id.imgView);
+
+                        //save new profile picture
+                        StorageReference ref = storageReference.child("images/" + user.getUid() + "/profile_picture");
+                        ref.putFile(filePath)
+                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(DefaultActivity.this, "Uploaded", Toast.LENGTH_SHORT).show();
+
+                                        imgView.setImageDrawable(null);
+                                        //display profile picture
+                                        Glide.with(DefaultActivity.this)
+                                                .using(new FirebaseImageLoader())
+                                                .load(storage.getReferenceFromUrl("gs://myfoodjournal-ad03b.appspot.com/images/" + user.getUid() + "/profile_picture"))
+                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                                .skipMemoryCache(true)
+                                                .into(imgView);
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(DefaultActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                        double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                                                .getTotalByteCount());
+                                        progressDialog.setMessage("Uploaded "+(int)progress+"%");
+                                    }
+                                });
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Uh-oh, an error occurred!
+                    }
+                });
             }
         } else {
-            adjustCurrentDrawerOption();
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+
+                boolean isTaggedRestaurant = false;
+                List<Integer> placeTypes = place.getPlaceTypes();
+                for (int i = 0; i < placeTypes.size(); i++) {
+                    if (placeTypes.get(i) == Place.TYPE_RESTAURANT) {
+                        isTaggedRestaurant = true;
+                        break;
+                    }
+                }
+
+                if (isTaggedRestaurant) {
+                    restaurantName = place;
+                    switch (requestCode) {
+                        case (1):
+                            selectNavOption("fragment_add_review");
+                            break;
+                        case (2):
+                            selectNavOption("restaurant_summary_fragment");
+                            break;
+                    }
+                } else {
+                    final View view = findViewById(R.id.fab);
+                    Snackbar.make(view, "This is not a restaurant!", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    adjustCurrentDrawerOption();
+                }
+            } else {
+                adjustCurrentDrawerOption();
+            }
         }
     }
 
