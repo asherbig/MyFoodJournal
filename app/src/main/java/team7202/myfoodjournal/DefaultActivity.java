@@ -8,10 +8,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -69,6 +71,12 @@ public class DefaultActivity extends AppCompatActivity
     private static FirebaseUser user = mAuth.getCurrentUser();
     private static DatabaseReference myRef = FirebaseDatabase.getInstance().getReference()
             .child("users").child(user.getUid());
+
+    private NotificationCompat.Builder mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+            .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
+            .setContentTitle("New Food Review!")
+            .setContentText("A user you follow has uploaded a review!")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,6 +218,8 @@ public class DefaultActivity extends AppCompatActivity
             Fragment fragment = WishlistFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Wishlist").commit();
         } else if (option.equals("fragment_myreviews")) {
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.notify(0, mBuilder.build());
             Fragment fragment = MyReviewsFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
         } else if (option.equals("fragment_add_review")) {
