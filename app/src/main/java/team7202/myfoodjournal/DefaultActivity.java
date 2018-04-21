@@ -56,6 +56,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -703,5 +704,29 @@ public class DefaultActivity extends AppCompatActivity
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
         selectNavOption("fragment_myreviews");
+    }
+
+    @Override
+    public void onUsernameLinkClicked(Map<String, String> reviewInfo) {
+        String uid = reviewInfo.get("User ID");
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("users").child(uid);
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, String> datum = new HashMap<>();
+                datum.put("User Name", (String) dataSnapshot.child("username").getValue());
+                datum.put("First Name", (String) dataSnapshot.child("firstname").getValue());
+                datum.put("Last Name", (String) dataSnapshot.child("lastname").getValue());
+                datum.put("Uid", (String) dataSnapshot.child("uid").getValue());
+                Fragment fragment = DetailedUserFragment.newInstance(datum);
+                getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(datum.get("User Name")).commit();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 }

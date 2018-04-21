@@ -45,13 +45,13 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_detailed_res_review, container, false);
-        final TextView reviewedBy = (TextView) view.findViewById(R.id.username_review);
+        final TextView reviewedBy = (TextView) view.findViewById(R.id.username);
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(reviewInfo.get("User ID"));
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String username = (String) dataSnapshot.child("username").getValue();
-                reviewedBy.setText("Reviewed by: " + username);
+                reviewedBy.setText(username);
             }
 
             @Override
@@ -60,6 +60,7 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
             }
         });
 
+        reviewedBy.setOnClickListener(this);
         TextView name = (TextView) view.findViewById(R.id.restuarant_name);
         name.setText(reviewInfo.get("Restaurant Name"));
         TextView menuItem = (TextView) view.findViewById(R.id.menu_item_name);
@@ -113,6 +114,11 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
                     mListener.onCancelButtonClicked();
                 }
                 break;
+            case (R.id.username):
+                if (mListener != null) {
+                    mListener.onUsernameLinkClicked(reviewInfo);
+                }
+                break;
         }
     }
 
@@ -120,5 +126,6 @@ public class DetailedResReviewFragment extends Fragment implements View.OnClickL
         // TODO: Update argument type and name
         void onAddWishlistButtonClicked(Map<String, String> reviewInfo);
         void onCancelButtonClicked();
+        void onUsernameLinkClicked(Map<String, String> reviewInfo);
     }
 }
