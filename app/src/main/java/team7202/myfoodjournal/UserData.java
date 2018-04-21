@@ -11,6 +11,7 @@ public class UserData {
     public String lastname;
     public String uid;
     public boolean isPublic;
+    public boolean newFollowedReviewExists;
 
     public UserData(String username, String email, String firstname, String lastname, String uid) {
         this.username = username;
@@ -19,5 +20,6 @@ public class UserData {
         this.lastname = lastname;
         this.uid = uid;
         this.isPublic = true;
+        this.newFollowedReviewExists = false;
     }
 }

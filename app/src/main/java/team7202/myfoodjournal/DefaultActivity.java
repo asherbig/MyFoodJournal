@@ -62,6 +62,7 @@ public class DefaultActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
+    private DefaultActivity selfPointer;
 
     public Place restaurantName;
 
@@ -80,6 +81,7 @@ public class DefaultActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        selfPointer = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
 
@@ -168,6 +170,25 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map userInfo = (Map) dataSnapshot.getValue();
+                if ((boolean) userInfo.get("newFollowedReviewExists")) {
+                    Map<String, Object> userUpdates = new HashMap<>();
+                    userUpdates.put("newFollowedReviewExists", false);
+                    myRef.updateChildren(userUpdates);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(selfPointer);
+                    notificationManager.notify(0, mBuilder.build());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private String getLayoutName(int resourceId) {
@@ -218,8 +239,6 @@ public class DefaultActivity extends AppCompatActivity
             Fragment fragment = WishlistFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Wishlist").commit();
         } else if (option.equals("fragment_myreviews")) {
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            notificationManager.notify(0, mBuilder.build());
             Fragment fragment = MyReviewsFragment.newInstance();
             getFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("My Reviews").commit();
         } else if (option.equals("fragment_add_review")) {
@@ -509,7 +528,25 @@ public class DefaultActivity extends AppCompatActivity
                 .child("my_reviews").child(user.getUid());
         final DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference()
                 .child("restaurants").child(restaurant_id);
+        final DatabaseReference followerRef = FirebaseDatabase.getInstance().getReference()
+                .child("followers").child(user.getUid());
+        final DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("users");
+        followerRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot follower : dataSnapshot.getChildren()) {
+                    Map<String, Object> userUpdates = new HashMap<>();
+                    userUpdates.put("newFollowedReviewExists", true);
+                    userRef.child(follower.getKey()).updateChildren(userUpdates);
+                }
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         if (reviewId.equals("")) {
             final String key = myReviewRef.push().getKey();
             ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_id,
