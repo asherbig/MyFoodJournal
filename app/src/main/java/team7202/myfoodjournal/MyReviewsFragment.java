@@ -274,9 +274,10 @@ public class MyReviewsFragment extends Fragment implements View.OnClickListener 
                 datum.put("Description", (String) reviewInfo.get("description"));
                 datum.put("Rating", reviewInfo.get("rating") + "/5");
                 datum.put("Date Submitted", (String) reviewInfo.get("date_submitted"));
-                datum.put("UserId", (String) reviewInfo.get("userId"));
+                datum.put("User ID", (String) reviewInfo.get("userId"));
                 datum.put("Review ID", (String) reviewInfo.get("reviewId"));
                 datum.put("Restaurant ID", (String) reviewInfo.get("restaurant_id"));
+                datum.put("Address", (String) reviewInfo.get("address"));
                 data.add(datum);
             }
         }
