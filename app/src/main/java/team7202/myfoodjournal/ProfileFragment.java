@@ -72,6 +72,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         editButton.setOnClickListener(this);
         Button passButton = (Button) view.findViewById(R.id.change_pass_button);
         passButton.setOnClickListener(this);
+        Button imageButton = (Button) view.findViewById(R.id.edit_profile_image);
+        imageButton.setOnClickListener(this);
 
         TextView usernameField = (TextView) view.findViewById(R.id.profile_username);
         usernameField.setText(currentUser.getDisplayName());
@@ -135,6 +137,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     mListener.onChangePassClicked();
                 }
                 break;
+            case (R.id.edit_profile_image):
+                if (mListener != null) {
+                    mListener.onEditProfilePictureClicked();
+                }
+                break;
         }
     }
 
@@ -152,5 +159,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         // TODO: Update argument type and name
         void onEditButtonClicked();
         void onChangePassClicked();
+        void onEditProfilePictureClicked();
     }
 }
