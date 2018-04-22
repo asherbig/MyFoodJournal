@@ -13,10 +13,12 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -79,6 +81,7 @@ public class DefaultActivity extends AppCompatActivity
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private NavigationView mNavigationView;
+    private DefaultActivity selfPointer;
 
     public Place restaurantName;
 
@@ -91,9 +94,16 @@ public class DefaultActivity extends AppCompatActivity
 
     private FirebaseStorage storage;
     private StorageReference storageReference;
+          
+    private NotificationCompat.Builder mBuilder = (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+            .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
+            .setContentTitle("New Food Review!")
+            .setContentText("A user you follow has uploaded a review!")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        selfPointer = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default);
 
@@ -195,6 +205,25 @@ public class DefaultActivity extends AppCompatActivity
                     }
                 }
         );
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map userInfo = (Map) dataSnapshot.getValue();
+                if ((boolean) userInfo.get("newFollowedReviewExists")) {
+                    Map<String, Object> userUpdates = new HashMap<>();
+                    userUpdates.put("newFollowedReviewExists", false);
+                    myRef.updateChildren(userUpdates);
+                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(selfPointer);
+                    notificationManager.notify(0, mBuilder.build());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private String getLayoutName(int resourceId) {
@@ -607,7 +636,25 @@ public class DefaultActivity extends AppCompatActivity
                 .child("my_reviews").child(user.getUid());
         final DatabaseReference restaurantRef = FirebaseDatabase.getInstance().getReference()
                 .child("restaurants").child(restaurant_id);
+        final DatabaseReference followerRef = FirebaseDatabase.getInstance().getReference()
+                .child("followers").child(user.getUid());
+        final DatabaseReference userRef = FirebaseDatabase.getInstance().getReference()
+                .child("users");
+        followerRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot follower : dataSnapshot.getChildren()) {
+                    Map<String, Object> userUpdates = new HashMap<>();
+                    userUpdates.put("newFollowedReviewExists", true);
+                    userRef.child(follower.getKey()).updateChildren(userUpdates);
+                }
+            }
 
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
         if (reviewId.equals("")) {
             final String key = myReviewRef.push().getKey();
             ReviewData reviewData = new ReviewData(key, user.getUid(), restaurant_id,

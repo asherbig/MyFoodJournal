@@ -11,7 +11,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.location.places.Place;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,7 +31,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Arrays;
 import java.util.Map;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.facebook.FacebookSdk.getApplicationContext;
 
 
 /**
@@ -46,6 +60,8 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
     private EditText menuitem;
     private EditText rating;
     private EditText description;
+
+    private CallbackManager callbackManager;
 
 
     public AddReviewFragment() {
@@ -201,8 +217,21 @@ public class AddReviewFragment extends Fragment implements View.OnClickListener 
                     mListener.onCancelButtonClicked();
                 }
                 break;
+            case (R.id.post_fb):
+                GraphRequest request=GraphRequest.newPostRequest(AccessToken.getCurrentAccessToken(), "me/feed", null, new GraphRequest.Callback() {
+                    @Override
+                    public void onCompleted(GraphResponse response) {
+                        Log.d("Test","STATUS UPDATED SUCESSFULLY");
+                    }
+                });
+                Bundle parameters=new Bundle();
+                parameters.putString("message","hellow everyone from newyork");
+                request.setParameters(parameters);
+                request.executeAsync();
+                break;
         }
     }
+
 
     /**
      * This interface must be implemented by activities that contain this
