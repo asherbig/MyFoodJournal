@@ -6,11 +6,20 @@
             android:id="@+id/nav_myreviews"
             android:title="My Reviews" />
         <item
+            android:id="@+id/nav_restaurants"
+            android:title="Restaurant Search" />
+        <item
+            android:id="@+id/nav_user_search"
+            android:title="Search for User" />
+        <item
             android:id="@+id/nav_profile"
             android:title="Profile" />
         <item
             android:id="@+id/nav_wishlist"
             android:title="Wishlist" />
+        <item
+            android:id="@+id/nav_settings"
+            android:title="Settings" />
         <item
             android:id="@+id/nav_logout"
             android:title="Log Out" />

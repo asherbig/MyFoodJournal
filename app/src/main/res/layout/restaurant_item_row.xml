@@ -3,9 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/reviewentry"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="5dp"
-    android:layout_marginTop="5dp">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -30,26 +28,23 @@
             android:text="TextView"
             android:textSize="12sp" />
 
-        <!--<TextView-->
-            <!--android:id="@+id/text3"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:maxLines="2"-->
-            <!--android:padding="1dp"-->
-            <!--android:text="TextView"-->
-            <!--android:textSize="10sp" />-->
+        <TextView
+            android:id="@+id/text3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:padding="1dp"
+            android:text="TextView"
+            android:textSize="10sp" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/text4"
-        android:layout_width="120dp"
+    <Button
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
+        android:layout_gravity="right"
         android:layout_weight="1"
-        android:lines="1"
-        android:text="TextView"
-        android:textSize="18sp"
-        android:layout_gravity="center"/>
+        android:text="Add to Wishlist" />
 
 </LinearLayout>
