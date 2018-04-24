@@ -4,12 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,22 +26,21 @@ import org.w3c.dom.Text;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ProfileFragment.OnProfileInteractionListener} interface
+ * {@link SettingsFragment.OnSettingsInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ProfileFragment#newInstance} factory method to
+ * Use the {@link SettingsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment implements View.OnClickListener {
+public class SettingsFragment extends Fragment implements View.OnClickListener {
 
-    private static final String ARG_MENU_OPTION = "menu_option";
-
-    //parameters
-    private String menuOptionParam;
-
-    private OnProfileInteractionListener mListener;
+    private OnSettingsInteractionListener mListener;
     private View view;
+    private boolean visibility;
+    private Switch visibilitySwitch;
+    private TextView status;
+    private Button exitButton;
 
-    public ProfileFragment() {
+    public SettingsFragment() {
         // Required empty public constructor
     }
 
@@ -48,72 +48,59 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment ProfileFragment.
+     * @return A new instance of fragment SettingsFragment.
      */
-    public static ProfileFragment newInstance() {
-        return new ProfileFragment();
+    // TODO: Rename and change types and number of parameters
+    public static SettingsFragment newInstance() {
+        return new SettingsFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            menuOptionParam = getArguments().getString(ARG_MENU_OPTION);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        view = inflater.inflate(R.layout.fragment_profile, container, false);
-        Button editButton = (Button) view.findViewById(R.id.edit_button);
-        editButton.setOnClickListener(this);
-        Button passButton = (Button) view.findViewById(R.id.change_pass_button);
-        passButton.setOnClickListener(this);
-        Button imageButton = (Button) view.findViewById(R.id.edit_profile_image);
-        imageButton.setOnClickListener(this);
+        view = inflater.inflate(R.layout.fragment_settings, container, false);
+        visibilitySwitch = (Switch) view.findViewById(R.id.visibilitySwitch);
+        visibilitySwitch.setOnClickListener(this);
 
-        TextView usernameField = (TextView) view.findViewById(R.id.profile_username);
-        usernameField.setText(currentUser.getDisplayName());
-        TextView emailField = (TextView) view.findViewById(R.id.profile_email);
-        emailField.setText(currentUser.getEmail());
-        final TextView firstNameField = (TextView) view.findViewById(R.id.first_name_field);
-        final TextView lastNameField = (TextView) view.findViewById(R.id.last_name_field);
-
-        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users")
-                .child(currentUser.getUid());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference myRef = FirebaseDatabase.getInstance().getReference().child("users").child(user.getUid());
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String firstName = (String) dataSnapshot.child("firstname").getValue();
-                firstNameField.setText(firstName);
-
-                String lastName = (String) dataSnapshot.child("lastname").getValue();
-                lastNameField.setText(lastName);
+                visibility = (Boolean) dataSnapshot.child("isPublic").getValue();
+                visibilitySwitch.setChecked(visibility);
+                status.setText((visibility)? "Public" : "Private");
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
         });
-
-
+        //set the exit button's click listener to this class
+        exitButton = (Button) view.findViewById(R.id.save_button);
+        exitButton.setOnClickListener(this);
+        //set the text to either public or private based on existing settings
+        status = (TextView) view.findViewById((R.id.status));
         return view;
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnProfileInteractionListener) {
-            mListener = (OnProfileInteractionListener) context;
+        if (context instanceof OnSettingsInteractionListener) {
+            mListener = (OnSettingsInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
 
     @Override
     public void onDetach() {
@@ -127,20 +114,15 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             //Calling the method through mListener will run the code in the default activity
             // which should swap the fragment to go to the right fragment
-            case (R.id.edit_button):
+            case (R.id.save_button):
                 if (mListener != null) {
-                    mListener.onEditButtonClicked();
+                    mListener.onSettingSaveButtonClicked(visibility);
                 }
                 break;
-            case (R.id.change_pass_button):
-                if (mListener != null) {
-                    mListener.onChangePassClicked();
-                }
-                break;
-            case (R.id.edit_profile_image):
-                if (mListener != null) {
-                    mListener.onEditProfilePictureClicked();
-                }
+            case (R.id.visibilitySwitch):
+                visibility = visibilitySwitch.isChecked();
+                String statusText = (visibility)? "Public" : "Private";
+                status.setText(statusText);
                 break;
         }
     }
@@ -155,10 +137,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnProfileInteractionListener {
-        // TODO: Update argument type and name
-        void onEditButtonClicked();
-        void onChangePassClicked();
-        void onEditProfilePictureClicked();
+    public interface OnSettingsInteractionListener {
+        void onSettingSaveButtonClicked(boolean visibility);
     }
 }

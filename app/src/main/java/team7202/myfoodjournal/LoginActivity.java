@@ -31,7 +31,13 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -49,10 +55,11 @@ import static android.Manifest.permission.READ_CONTACTS;
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     // UI references.
-    private AutoCompleteTextView mUsernameView;
+    private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
 
         // Set up the login form.
-        mUsernameView = (AutoCompleteTextView) findViewById(R.id.username);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -88,9 +95,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 attemptRegister();
             }
         });
+        Button forgotPasswordButton = (Button) findViewById(R.id.forgot_password);
+        forgotPasswordButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                forgotPassword();
+            }
+        });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        mAuth = FirebaseAuth.getInstance();
     }
 
     /**
@@ -101,31 +117,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void attemptLogin() {
 
         // Reset errors.
-        mUsernameView.setError(null);
+        mEmailView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        final String username = mUsernameView.getText().toString();
+        final String email = mEmailView.getText().toString();
         final String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        // Check for a valid password
+        if (TextUtils.isEmpty(password)) {
+            mPasswordView.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView;
+            cancel = true;
+        } else if (!isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(username)) {
-            mUsernameView.setError(getString(R.string.error_field_required));
-            focusView = mUsernameView;
+        if (TextUtils.isEmpty(email)) {
+            mEmailView.setError(getString(R.string.error_field_required));
+            focusView = mEmailView;
             cancel = true;
-        } else if (!isUsernameValid(username)) {
-            mUsernameView.setError(getString(R.string.error_invalid_email));
-            focusView = mUsernameView;
+        } else if (!isUsernameValid(email)) {
+            mEmailView.setError(getString(R.string.error_invalid_email));
+            focusView = mEmailView;
             cancel = true;
         }
 
@@ -138,35 +158,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
 
-            DatabaseReference loginCredentials = FirebaseDatabase.getInstance().getReference(username);
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
+                                startActivity(i);
+                                finish();
+                            } else {
+                                // If sign in fails, display a message to the user.
+                                Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
+                                Intent i = new Intent(LoginActivity.this, LoginActivity.class);
+                                startActivity(i);
+                                finish();
 
-            loginCredentials.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String actualPassword = (String) dataSnapshot.getValue();
 
-                    showProgress(false);
-                    if (actualPassword != null && actualPassword.equals(password)) {
-                        Intent i = new Intent(LoginActivity.this, DefaultActivity.class);
-                        startActivity(i);
-                        finish();
-                    } else {
-                        mPasswordView.setError(getString(R.string.error_incorrect_password));
-                        mPasswordView.requestFocus();
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
+                            }
+                        }
+                    });
         }
     }
 
     private void attemptRegister() {
-        //Go to Registration Intent
         Intent i = new Intent(LoginActivity.this, RegisterActivity.class);
+        startActivity(i);
+        finish();
+    }
+
+    private void forgotPassword() {
+        Intent i = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
         startActivity(i);
         finish();
     }
@@ -257,7 +281,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 new ArrayAdapter<>(LoginActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
-        mUsernameView.setAdapter(adapter);
+        mEmailView.setAdapter(adapter);
     }
 
 

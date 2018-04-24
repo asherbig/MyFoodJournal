@@ -8,10 +8,16 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark"
     android:gravity="bottom" >
 
+    <ImageView
+        android:id="@+id/imgView"
+        android:layout_width="match_parent"
+        android:layout_height="127dp" />
+
     <TextView
         android:id="@+id/navheader_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Username"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
 </LinearLayout>
